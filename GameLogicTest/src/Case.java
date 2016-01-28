@@ -1,10 +1,7 @@
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.JComponent;
-
 
 public class Case extends JComponent {
 
@@ -83,5 +80,11 @@ public class Case extends JComponent {
 				return ECouleurCase.Bleu;
 		}
 	}
+	
+	/*public Image GetImageCase()
+	{
+		  String basePath = "C:\\temp\\Mobile_INF8405\\GameLogicTest\\src\\Images";
+		  Image img = Toolkit.getDefaultToolkit().getImage(basePath+"\\"+"caseVide.png");
+	}*/
 	
 }

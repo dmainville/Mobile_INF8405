@@ -9,7 +9,8 @@ import javax.swing.JComponent;
 
 
 public class Grille extends JComponent {
-
+	private static final long serialVersionUID = 1L;
+	
 	int dimensionX;
 	int dimensionY;
 	Case[][] cases;
@@ -35,7 +36,7 @@ public class Grille extends JComponent {
 			}
 		}
 		
-		String basePath = "C:\\temp\\Mobile_INF8405\\GameLogicTest\\src";
+		String basePath = "src";
 		String nomLevel = "7_7_Niveau1.txt";
 		
 		String levelData = "Error loading level data";
@@ -79,7 +80,7 @@ public class Grille extends JComponent {
 		  for(int j=0; j<dimensionY; j++)
 		  {
 			  Case c = cases[i][j];
-			  String basePath = "C:\\temp\\Mobile_INF8405\\GameLogicTest\\src\\Images";
+			  String basePath = "src\\Images";
 			  Image img = Toolkit.getDefaultToolkit().getImage(basePath+"\\"+"caseVide.png");
 			  g2.drawImage(img, c.posX*c.DIMENSION, c.posY*c.DIMENSION, this);	  
 		  }
