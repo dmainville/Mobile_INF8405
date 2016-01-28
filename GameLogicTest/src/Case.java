@@ -11,7 +11,7 @@ public class Case extends JComponent {
 	
 	int posX;
 	int posY;
-	int DIMENSION = 50;
+	int DIMENSION = 100;
 	
 	//Initialise la case comme étant vide
 	Case(int x, int y){
@@ -76,15 +76,68 @@ public class Case extends JComponent {
 				return ECouleurCase.Orange;
 			case "v":
 				return ECouleurCase.Vert;
+			case "l":
+				return ECouleurCase.Lime;
+			case "m":
+				return ECouleurCase.Melon;
+			case "p":
+				return ECouleurCase.Pourpre;
+			case "g":
+				return ECouleurCase.Gris;
 			default:
 				return ECouleurCase.Bleu;
 		}
 	}
 	
-	/*public Image GetImageCase()
+	public String GetStringFromCouleur()
 	{
-		  String basePath = "C:\\temp\\Mobile_INF8405\\GameLogicTest\\src\\Images";
-		  Image img = Toolkit.getDefaultToolkit().getImage(basePath+"\\"+"caseVide.png");
-	}*/
+		if(this.etat == EEtatCase.Vide)
+			return " ";
+		
+		switch (this.couleur)
+		{
+			case Bleu:
+				return "b";
+			case Rouge:
+				return "r";
+			case Jaune:
+				return "j";
+			case Orange:
+				return "o";
+			case Vert:
+				return "v";
+			case Lime:
+				return "l";
+			case Melon:
+				return "m";
+			case Pourpre:
+				return "p";
+			case Gris:
+				return "g";
+			default:
+				return "b";
+		}
+	}
+	
+	public Image GetImageCase()
+	{
+		String basePath = "src\\Images";
+		String imagePath = "caseVide.png";
+		
+		switch (this.etat) {
+		case Depart:
+			imagePath = "cercle_"+GetStringFromCouleur()+".png";
+			break;
+		case Vide:
+			imagePath = "caseVide.png";
+			break;
+		default:
+			imagePath = "caseVide.png";
+			break;
+		}
+			
+		Image img = Toolkit.getDefaultToolkit().getImage(basePath+"\\"+imagePath);
+		return img;
+	}
 	
 }

@@ -1,7 +1,5 @@
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -60,9 +58,9 @@ public class Grille extends JComponent {
 		String[] rows = levelData.split(";");
 		for(int i=0; i<rows.length; i++)
 		{
-			String[] donneeCase = levelData.split(",");
-			int posX = Integer.parseInt(donneeCase[0]);
-			int posY = Integer.parseInt(donneeCase[1]);
+			String[] donneeCase = rows[i].split(",");
+			int posX = Integer.parseInt(donneeCase[0].trim());
+			int posY = Integer.parseInt(donneeCase[1].trim());
 			String couleur = donneeCase[2];
 			
 			cases[posX][posY] = new Case(posX,posY,couleur);
@@ -80,13 +78,28 @@ public class Grille extends JComponent {
 		  for(int j=0; j<dimensionY; j++)
 		  {
 			  Case c = cases[i][j];
-			  String basePath = "src\\Images";
-			  Image img = Toolkit.getDefaultToolkit().getImage(basePath+"\\"+"caseVide.png");
-			  g2.drawImage(img, c.posX*c.DIMENSION, c.posY*c.DIMENSION, this);	  
+			  g2.drawImage(c.GetImageCase(), c.posX*c.DIMENSION, c.posY*c.DIMENSION, this);	  
 		  }
 	  }
 	  		    
 	  g2.finalize();
+  }
+  
+  public String toString()
+  {
+	  String strGrille = "";
+	  
+	  for(int i=0; i<dimensionY; i++)
+	  {
+		  for(int j=0; j<dimensionX; j++)
+		  {
+			  Case c = cases[j][i];
+			  strGrille+="["+c.GetStringFromCouleur()+"] ";
+		  }
+		  strGrille+="\n";
+	  }
+	  
+	  return strGrille;
   }
 	
 }
