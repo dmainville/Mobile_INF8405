@@ -8,6 +8,8 @@ public class Case extends JComponent {
 	private static final long serialVersionUID = 1L;
 	ECouleurCase couleur;
 	EEtatCase etat;
+	Case caseSuivante = null;
+	Case casePrecedente = null;
 	
 	int posX;
 	int posY;
@@ -125,12 +127,15 @@ public class Case extends JComponent {
 		String imagePath = "caseVide.png";
 		
 		switch (this.etat) {
+		case Occupe:
 		case Depart:
 			imagePath = "cercle_"+GetStringFromCouleur()+".png";
 			break;
 		case Vide:
 			imagePath = "caseVide.png";
 			break;
+		
+			//imagePath = "ligne_horizontale_"+GetStringFromCouleur()+".png";
 		default:
 			imagePath = "caseVide.png";
 			break;
