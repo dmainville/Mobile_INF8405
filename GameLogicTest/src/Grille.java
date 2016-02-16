@@ -23,14 +23,48 @@ public class Grille extends JComponent implements MouseListener, MouseMotionList
 	
 	Grille(int niveau)
 	{
+		int dim = getDimensionNiveau(niveau);
+		this.dimensionX = dim;
+		this.dimensionY = dim;
 		
+		initialiseCases();
+		chargeNiveau(niveau);
 	}
 	
 	Grille()
 	{
+		//Constructeur test, charge le premier niveau
+		
 		this.dimensionX = 7;
 		this.dimensionY = 7;
 		
+		initialiseCases();
+		chargeNiveau(1);
+	}
+	
+	private int getDimensionNiveau(int niveau)
+	{
+		if(niveau>3)
+			return 8;
+		return 7;
+	}
+	
+	private String getNomNiveau(int niveau)
+	{
+		String nomNiveau = "Niveau";
+		String sousNiveau = "";
+		String categorie = "7_7_";
+		
+		if(niveau>3)
+			categorie = "8_8_";
+		
+		sousNiveau = Integer.toString(((niveau+2)%3)+1);
+		
+		return categorie+nomNiveau+sousNiveau+".txt";
+	}
+	
+	private void initialiseCases()
+	{
 		cases = new Case[dimensionX][dimensionY];
 		
 		//Initialisation des cases à vide
@@ -41,14 +75,16 @@ public class Grille extends JComponent implements MouseListener, MouseMotionList
 				cases[i][j] = new Case(i,j);
 			}
 		}
-		
+	}
+	
+	private void chargeNiveau(int niveau)
+	{
 		String basePath = "src";
-		String nomLevel = "7_7_Niveau1.txt";
-		
+		String nomNiveau = getNomNiveau(niveau);
 		String levelData = "Error loading level data";
 		
 		//Lire le fichier de données du niveau (Commas separated values)
-		File file = new File(basePath+"\\"+nomLevel);
+		File file = new File(basePath+"\\"+nomNiveau);
 		FileInputStream fis;
 		try
 		{
@@ -75,7 +111,6 @@ public class Grille extends JComponent implements MouseListener, MouseMotionList
 		}
 		
 		System.out.println(levelData);
-		
 		
 	}
 	
