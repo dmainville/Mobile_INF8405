@@ -12,6 +12,7 @@ import javax.swing.JComponent;
 public class Grille extends JComponent implements MouseListener, MouseMotionListener {
 	private static final long serialVersionUID = 1L;
 	
+	IObserver gestionnaire = null;
 	int dimensionX;
 	int dimensionY;
 	Case[][] cases;
@@ -21,8 +22,10 @@ public class Grille extends JComponent implements MouseListener, MouseMotionList
 	ECouleurCase couleurSelectionnee = ECouleurCase.Vide;
 	Case caseSelectionnee = null;
 	
-	Grille(int niveau)
+	Grille(int niveau, IObserver gestionnaire)
 	{
+		this.gestionnaire = gestionnaire;
+		
 		int dim = getDimensionNiveau(niveau);
 		this.dimensionX = dim;
 		this.dimensionY = dim;
@@ -408,13 +411,15 @@ public class Grille extends JComponent implements MouseListener, MouseMotionList
 	//Notification des observes lors d'une modification de case
 	public void notifyCase(Case c)
 	{
-		
+		if(gestionnaire!=null)
+			gestionnaire.notifyCase(c);
 	}
 	
 	//Notification des observes lors d'une victoire
 	public void notifyVictoire()
 	{
-		System.out.println("Victoire");
+		if(gestionnaire!=null)
+			gestionnaire.notifyVictoire();
 	}
 	
 	@Override
