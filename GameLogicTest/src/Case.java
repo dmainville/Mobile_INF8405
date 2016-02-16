@@ -1,15 +1,14 @@
 import java.awt.Image;
 import java.awt.Toolkit;
 
-import javax.swing.JComponent;
+public class Case {
 
-public class Case extends JComponent {
-
-	private static final long serialVersionUID = 1L;
 	ECouleurCase couleur;
 	EEtatCase etat;
 	Case caseSuivante = null;
 	Case casePrecedente = null;
+	EPositionRelative posRelativeSuivant = EPositionRelative.Invalide;
+	EPositionRelative posRelativePrecedant = EPositionRelative.Invalide;
 	
 	int posX;
 	int posY;
@@ -128,14 +127,95 @@ public class Case extends JComponent {
 		
 		switch (this.etat) {
 		case Occupe:
-		case Depart:
+			
 			imagePath = "cercle_"+GetStringFromCouleur()+".png";
+			
+			if		//Horizontale
+			(		(posRelativePrecedant == EPositionRelative.Gauche && 
+						posRelativeSuivant == EPositionRelative.Droite) ||
+						(posRelativePrecedant == EPositionRelative.Droite && 
+								posRelativeSuivant == EPositionRelative.Gauche) ||
+						(posRelativePrecedant == EPositionRelative.Gauche && 
+						posRelativeSuivant == EPositionRelative.Invalide) ||
+						(posRelativePrecedant == EPositionRelative.Droite && 
+						posRelativeSuivant == EPositionRelative.Invalide)
+			)
+			{
+				imagePath = "ligne_horizontale_"+GetStringFromCouleur()+".png";
+			}
+			else if		//Verticale
+			(		(posRelativePrecedant == EPositionRelative.Haut && 
+					posRelativeSuivant == EPositionRelative.Bas) ||
+					(posRelativePrecedant == EPositionRelative.Bas && 
+							posRelativeSuivant == EPositionRelative.Haut) ||
+					(posRelativePrecedant == EPositionRelative.Haut && 
+					posRelativeSuivant == EPositionRelative.Invalide) ||
+					(posRelativePrecedant == EPositionRelative.Bas && 
+					posRelativeSuivant == EPositionRelative.Invalide)
+					
+			)
+			{
+				imagePath = "ligne_verticale_"+GetStringFromCouleur()+".png";
+			}
+			else if		//Coin1
+			(
+				(posRelativePrecedant == EPositionRelative.Bas && 
+				posRelativeSuivant == EPositionRelative.Gauche) ||
+				(posRelativePrecedant == EPositionRelative.Gauche && 
+				posRelativeSuivant == EPositionRelative.Bas)
+			)
+			{
+				imagePath = "coin1_"+GetStringFromCouleur()+".png";
+			}
+			else if		//Coin2
+			(
+				(posRelativePrecedant == EPositionRelative.Bas && 
+				posRelativeSuivant == EPositionRelative.Droite) ||
+				(posRelativePrecedant == EPositionRelative.Droite && 
+				posRelativeSuivant == EPositionRelative.Bas)
+			)
+			{
+				imagePath = "coin2_"+GetStringFromCouleur()+".png";
+			}
+			else if		//Coin3
+			(
+				(posRelativePrecedant == EPositionRelative.Haut && 
+				posRelativeSuivant == EPositionRelative.Droite) ||
+				(posRelativePrecedant == EPositionRelative.Droite && 
+				posRelativeSuivant == EPositionRelative.Haut)
+			)
+			{
+				imagePath = "coin3_"+GetStringFromCouleur()+".png";
+			}
+			else if		//Coin4
+			(
+				(posRelativePrecedant == EPositionRelative.Haut && 
+				posRelativeSuivant == EPositionRelative.Gauche) ||
+				(posRelativePrecedant == EPositionRelative.Gauche && 
+				posRelativeSuivant == EPositionRelative.Haut)
+			)
+			{
+				imagePath = "coin4_"+GetStringFromCouleur()+".png";
+			}
+			break;
+			
+		case Depart:
+			
+			if(posRelativeSuivant == EPositionRelative.Invalide)
+				imagePath = "cercle_"+GetStringFromCouleur()+".png";
+			else if(posRelativeSuivant == EPositionRelative.Haut)
+				imagePath = "cercle_bas_"+GetStringFromCouleur()+".png";
+			else if(posRelativeSuivant == EPositionRelative.Bas)
+				imagePath = "cercle_haut_"+GetStringFromCouleur()+".png";
+			else if(posRelativeSuivant == EPositionRelative.Droite)
+				imagePath = "cercle_gauche_"+GetStringFromCouleur()+".png";
+			else if(posRelativeSuivant == EPositionRelative.Gauche)
+				imagePath = "cercle_droite_"+GetStringFromCouleur()+".png";
+
 			break;
 		case Vide:
 			imagePath = "caseVide.png";
 			break;
-		
-			//imagePath = "ligne_horizontale_"+GetStringFromCouleur()+".png";
 		default:
 			imagePath = "caseVide.png";
 			break;
