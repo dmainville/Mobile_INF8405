@@ -16,7 +16,8 @@
         android:id="@+id/facile1"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:onClick="facile1Clique" />
+        android:onClick="facile1Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -24,7 +25,9 @@
         android:text="@string/facile2"
         android:id="@+id/facile2"
         android:layout_below="@+id/facile1"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="facile2Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -32,7 +35,9 @@
         android:text="@string/facile3"
         android:id="@+id/facile3"
         android:layout_below="@+id/facile2"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="facile3Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -40,7 +45,9 @@
         android:text="@string/difficile1"
         android:id="@+id/difficile1"
         android:layout_below="@+id/facile3"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="difficile1Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -48,7 +55,9 @@
         android:text="@string/difficile2"
         android:id="@+id/difficile2"
         android:layout_below="@+id/difficile1"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="difficile2Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -56,7 +65,9 @@
         android:text="@string/difficile2"
         android:id="@+id/difficile3"
         android:layout_below="@+id/difficile2"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="difficile3Clique"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"
@@ -64,7 +75,9 @@
         android:text="@string/prochain"
         android:id="@+id/prochain"
         android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:enabled="true"
+        android:onClick="nextClique" />
 
     <Button
         android:layout_width="wrap_content"
@@ -72,5 +85,7 @@
         android:text="@string/quit"
         android:id="@+id/quit"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:enabled="true"
+        android:onClick="quitterClique" />
 </RelativeLayout>

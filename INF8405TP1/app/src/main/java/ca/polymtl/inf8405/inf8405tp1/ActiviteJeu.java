@@ -11,10 +11,13 @@ import android.widget.ImageView;
 
 public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
+    // bitmask indiquant quel niveaux sont déverrouillés
+    int mDeverrouille = 1;
+
     final private int MLargeurCase = 150;
     private int mCasesParLigne = 7;
 
-    private int mNiveau = 1;
+    private int mNiveau = 0;
 
     private GridLayout mZoneDeJeu;
     private Grille mGrille;
@@ -49,6 +52,9 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
         // sauvegarder le nouveau niveau
         mNiveau = niveau;
+
+        // indiquer que le nouveau niveau est dorénavant déverrouillé
+        mDeverrouille |= (0b01 << (niveau -1));
 
         // calculer le nombre de cases par ligne
         if (niveau >=4)
@@ -143,7 +149,8 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     public void gagnerPartie(View view)
     {
         Intent intent = new Intent(this, ActiviteFinPartie.class);
-        
+        intent.putExtra("deverrouille", mDeverrouille);
+        intent.putExtra("niveauCourant", mNiveau);
         startActivityForResult(intent, 0);
     }
 
@@ -152,16 +159,29 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     {
         super.onActivityResult(requestCode, resultCode, intent);
         //TODO: gérer le setup avec les nouvelles donnée ou quitter si quit.
-        System.out.println("Request Code: " + requestCode + " Result Code: " + resultCode);
+        switch (requestCode)
+        {
+            case 0: // code pour fin partie
+
+                break;
+            default:
+                System.out.println("Request Code: " + requestCode + " Result Code: " + resultCode);
+                break;
+        }
     }
 
     public void quitterJeuClique(View view)
     {
-        //Todo: confirmer, détruire, retourner au menu principal
-        System.out.println("quitting game");
+        quitterPartie();
     }
 
+    private void quitterPartie()
+    {
+        // TODO: gérer popup confirmation
+        //Todo: confirmer, détruire, retourner au menu principal
 
+        finish();
+    }
 
     public void notifyVictoire()
     {
