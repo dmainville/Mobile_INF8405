@@ -88,9 +88,6 @@ public class Grille {
 			
 			cases[posX][posY] = new Case(posX,posY,couleur);
 		}
-		
-		System.out.println(levelData);
-		
 	}
 
   

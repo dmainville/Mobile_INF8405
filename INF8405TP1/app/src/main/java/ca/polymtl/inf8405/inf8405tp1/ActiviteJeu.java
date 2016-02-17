@@ -1,17 +1,13 @@
 package ca.polymtl.inf8405.inf8405tp1;
 
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 
 public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
@@ -20,7 +16,7 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
     private int mNiveau = 1;
 
-    private TableLayout mZoneDeJeu;
+    private GridLayout mZoneDeJeu;
     private Grille mGrille;
 
 
@@ -33,7 +29,7 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
         setContentView(R.layout.activity_activite_jeu);
 
         // avant tout, set la zone de jeu
-        mZoneDeJeu = (TableLayout) findViewById(R.id.zoneDeJeu);
+        mZoneDeJeu = (GridLayout) findViewById(R.id.zoneDeJeu);
 
 
         // Chercher les valeurs passées par l'activité précédente
@@ -62,17 +58,15 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
         // créer la grille dans la logique de jeu, en se passant comme observer
         mGrille = new Grille(mNiveau, this);
-        System.out.println(mGrille.toString());
+
+
+        mZoneDeJeu.setColumnCount(mCasesParLigne);
+        mZoneDeJeu.setRowCount(mCasesParLigne);
 
 
         // Dynamiquement ajouter des lignes et cellules au tableau
         for (int i = 0; i < mCasesParLigne; ++i)
         {
-            TableRow row = new TableRow(this);
-
-            // Ajouter les paramètres
-            TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
-            row.setLayoutParams(lp);
 
 
             // Ajouter les cellules
@@ -85,14 +79,11 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
 
                 // faire l'appel pour chercher le bon background
-
                 int backgroundImageID = mGrille.getBackgroundIdALaCase(j, i);
                 mCases[offset].setBackground(ContextCompat.getDrawable(getApplicationContext(),backgroundImageID));
 
-                row.addView(mCases[offset]);
+                mZoneDeJeu.addView(mCases[offset]);
             }
-
-            mZoneDeJeu.addView(row);
 
         }
     }
@@ -126,12 +117,6 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
             {
-                //TODO: nettoyer
-                String myString = "Touch " + Integer.toString(motionEvent.getAction()) + "; " + Float.toString(motionEvent.getX()) + "," + Float.toString(motionEvent.getY());
-                System.out.println(myString);
-                System.out.println(getIndexFromXPosition(motionEvent.getX()) + " " +
-                        getIndexFromYPosition(motionEvent.getY()));
-
                 // calculer l'index dans le tableau du point courant
 
                 mGrille.CliqueCase(
@@ -158,6 +143,7 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     public void gagnerPartie(View view)
     {
         Intent intent = new Intent(this, ActiviteFinPartie.class);
+        
         startActivityForResult(intent, 0);
     }
 
@@ -180,6 +166,7 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     public void notifyVictoire()
     {
         //TODO: faire le setup de la nouvelle partie
+        // voir gangerPartie
         // Prompt à l'usager : Quel niveau (next ou antérieur ou replay) ou Quitter
         // Envoyer message au modèle de charger la nouvelle partie.
         // Mettre à jour le display du numéro de partie
@@ -187,8 +174,6 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
     public void notifyCase(Case c)
     {
-        //TODO: modifier la mCase(index);
-
         int backgroundImageID = mGrille.getBackgroundIdALaCase(c.posX, c.posY);
         mCases[c.posY*mCasesParLigne + c.posX].setBackground(ContextCompat.getDrawable(getApplicationContext(),backgroundImageID));
     }

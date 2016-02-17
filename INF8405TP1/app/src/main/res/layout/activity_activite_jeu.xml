@@ -9,10 +9,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ActiviteJeu">
 
-    <TableLayout
+    <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/zoneDeJeu"></TableLayout>
+        android:id="@+id/zoneDeJeu"></GridLayout>
 
     <Button
         android:layout_width="wrap_content"

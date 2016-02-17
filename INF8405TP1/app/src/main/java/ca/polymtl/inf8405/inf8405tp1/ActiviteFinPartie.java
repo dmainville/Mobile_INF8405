@@ -14,7 +14,32 @@ public class ActiviteFinPartie extends AppCompatActivity {
 
     public void facile1Clique(View view)
     {
-        setResult(71);
+        setResult(1);
+        finish();
+    }
+    public void facile2Clique(View view)
+    {
+        setResult(1);
+        finish();
+    }
+    public void facile3Clique(View view)
+    {
+        setResult(1);
+        finish();
+    }
+    public void facile4Clique(View view)
+    {
+        setResult(1);
+        finish();
+    }
+    public void facile5Clique(View view)
+    {
+        setResult(1);
+        finish();
+    }
+    public void facile6Clique(View view)
+    {
+        setResult(1);
         finish();
     }
 }
