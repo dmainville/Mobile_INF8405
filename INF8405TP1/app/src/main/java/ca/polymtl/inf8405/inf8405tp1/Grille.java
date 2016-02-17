@@ -62,7 +62,7 @@ public class Grille {
 	{
 		cases = new Case[dimensionX][dimensionY];
 		
-		//Initialisation des cases � vide
+		//Initialisation des cases vides
 		for(int i =0; i<dimensionX; i++)
 		{
 			for(int j =0; j<dimensionY; j++)
@@ -75,17 +75,15 @@ public class Grille {
 	private void chargeNiveau(int niveau)
 	{
 		String levelData = "Error loading level data";
-		
-		//Lire le fichier de donn�es du niveau (Commas separated values)
-		//File file = ((Context)gestionnaire).getResources().openRawResource(getResIdNiveau(niveau));
-		//File file = new File(basePath+"\\"+nomNiveau);
+
 		InputStream fis;
 		try
 		{
 			fis = ((Context)gestionnaire).getResources().openRawResource(getResIdNiveau(niveau));
-			byte[] data = new byte[100];
+			byte[] data = new byte[fis.available()];
 			fis.read(data);
 			fis.close();
+
 			levelData = new String(data, "UTF-8");
 		}
 		catch (Exception e)
@@ -385,20 +383,19 @@ public class Grille {
 		default:
 			return;
 		}
-		
-		//repaint();
-		//System.out.println(this.toString());
 	}
 
-	public String getBackgroundALaCase(int x, int y)
+	public int getBackgroundIdALaCase(int x, int y)
 	{
 		if (x >= 0 && x < dimensionX && y >=0 && y < dimensionY)
 		{
-			return cases[x][y].GetImageCase();
+			String imageName = cases[x][y].GetImageNameCase();
+			Context context = ((Context)gestionnaire).getApplicationContext();
+			return context.getResources().getIdentifier(imageName,"drawable", context.getPackageName());
 		}
 		else
 		{
-			return null;
+			return -1;
 		}
 	}
 

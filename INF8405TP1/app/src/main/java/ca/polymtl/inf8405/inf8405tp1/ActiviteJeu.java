@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -61,7 +62,8 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
             mCasesParLigne = 7;
 
         // créer la grille dans la logique de jeu, en se passant comme observer
-        //mGrille = new Grille(mNiveau, this);
+        mGrille = new Grille(mNiveau, this);
+        System.out.println(mGrille.toString());
 
 
         // Dynamiquement ajouter des lignes et cellules au tableau
@@ -82,10 +84,11 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
                 mCases[offset].setMinimumWidth(MLargeurCase);
                 mCases[offset].setMinimumHeight(MLargeurCase);
 
-                // TODO: faire l'appel pour chercher le bon background
 
-                //String backgroundImagePath = mGrille.getBackgroundALaCase(j, i);
-                //mCases[offset].setBackground(R.drawable. Drawable.createFromPath(backgroundImagePath));
+                // faire l'appel pour chercher le bon background
+
+                int backgroundImageID = mGrille.getBackgroundIdALaCase(j, i);
+                mCases[offset].setBackground(ContextCompat.getDrawable(getApplicationContext(),backgroundImageID));
 
                 row.addView(mCases[offset]);
             }
@@ -132,20 +135,20 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
                 // calculer l'index dans le tableau du point courant
 
-                /*mGrille.CliqueCase(
+                mGrille.CliqueCase(
                         getIndexFromXPosition(motionEvent.getX()),
                         getIndexFromYPosition(motionEvent.getY()),
                         ETypeClique.Click
-                );*/
+                );
 
             }
 
             else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE)
             {
-                /*mGrille.CliqueCase(
+                mGrille.CliqueCase(
                         getIndexFromXPosition(motionEvent.getX()),
                         getIndexFromYPosition(motionEvent.getY()),
-                        ETypeClique.Drag);*/
+                        ETypeClique.Drag);
             }
 
             return true;
@@ -186,5 +189,8 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     public void notifyCase(Case c)
     {
         //TODO: modifier la mCase(index);
+
+        int backgroundImageID = mGrille.getBackgroundIdALaCase(c.posX, c.posY);
+        mCases[c.posY*mCasesParLigne + c.posX].setBackground(ContextCompat.getDrawable(getApplicationContext(),backgroundImageID));
     }
 }

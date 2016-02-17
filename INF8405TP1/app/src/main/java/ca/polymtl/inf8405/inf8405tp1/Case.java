@@ -120,15 +120,14 @@ public class Case {
 		}
 	}
 	
-	public String GetImageCase()
+	public String GetImageNameCase()
 	{
-		String basePath = "src\\Images";
-		String imagePath = "caseVide.png";
+		String imagePath = "caseVide";
 		
 		switch (this.etat) {
 		case Occupe:
 			
-			imagePath = "cercle_"+GetStringFromCouleur()+".png";
+			imagePath = "cercle_"+GetStringFromCouleur();
 			
 			if		//Horizontale
 			(		(posRelativePrecedant == EPositionRelative.Gauche && 
@@ -141,7 +140,7 @@ public class Case {
 						posRelativeSuivant == EPositionRelative.Invalide)
 			)
 			{
-				imagePath = "ligne_horizontale_"+GetStringFromCouleur()+".png";
+				imagePath = "ligne_horizontale_"+GetStringFromCouleur();
 			}
 			else if		//Verticale
 			(		(posRelativePrecedant == EPositionRelative.Haut && 
@@ -155,7 +154,7 @@ public class Case {
 					
 			)
 			{
-				imagePath = "ligne_verticale_"+GetStringFromCouleur()+".png";
+				imagePath = "ligne_verticale_"+GetStringFromCouleur();
 			}
 			else if		//Coin1
 			(
@@ -165,7 +164,7 @@ public class Case {
 				posRelativeSuivant == EPositionRelative.Bas)
 			)
 			{
-				imagePath = "coin1_"+GetStringFromCouleur()+".png";
+				imagePath = "coin1_"+GetStringFromCouleur();
 			}
 			else if		//Coin2
 			(
@@ -175,7 +174,7 @@ public class Case {
 				posRelativeSuivant == EPositionRelative.Bas)
 			)
 			{
-				imagePath = "coin2_"+GetStringFromCouleur()+".png";
+				imagePath = "coin2_"+GetStringFromCouleur();
 			}
 			else if		//Coin3
 			(
@@ -185,7 +184,7 @@ public class Case {
 				posRelativeSuivant == EPositionRelative.Haut)
 			)
 			{
-				imagePath = "coin3_"+GetStringFromCouleur()+".png";
+				imagePath = "coin3_"+GetStringFromCouleur();
 			}
 			else if		//Coin4
 			(
@@ -195,34 +194,33 @@ public class Case {
 				posRelativeSuivant == EPositionRelative.Haut)
 			)
 			{
-				imagePath = "coin4_"+GetStringFromCouleur()+".png";
+				imagePath = "coin4_"+GetStringFromCouleur();
 			}
 			break;
 			
 		case Depart:
 			
 			if(posRelativeSuivant == EPositionRelative.Invalide)
-				imagePath = "cercle_"+GetStringFromCouleur()+".png";
+				imagePath = "cercle_"+GetStringFromCouleur();
 			else if(posRelativeSuivant == EPositionRelative.Haut)
-				imagePath = "cercle_bas_"+GetStringFromCouleur()+".png";
+				imagePath = "cercle_bas_"+GetStringFromCouleur();
 			else if(posRelativeSuivant == EPositionRelative.Bas)
-				imagePath = "cercle_haut_"+GetStringFromCouleur()+".png";
+				imagePath = "cercle_haut_"+GetStringFromCouleur();
 			else if(posRelativeSuivant == EPositionRelative.Droite)
-				imagePath = "cercle_gauche_"+GetStringFromCouleur()+".png";
+				imagePath = "cercle_gauche_"+GetStringFromCouleur();
 			else if(posRelativeSuivant == EPositionRelative.Gauche)
-				imagePath = "cercle_droite_"+GetStringFromCouleur()+".png";
+				imagePath = "cercle_droite_"+GetStringFromCouleur();
 
 			break;
 		case Vide:
-			imagePath = "case_vide.png";
+			imagePath = "case_vide";
 			break;
 		default:
-			imagePath = "case_vide.png";
+			imagePath = "case_vide";
 			break;
 		}
 			
-		String img = basePath+"\\"+imagePath;
-		return img;
+		return imagePath;
 	}
 	
 }
