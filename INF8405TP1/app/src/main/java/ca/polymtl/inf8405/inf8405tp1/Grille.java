@@ -1,8 +1,11 @@
 package ca.polymtl.inf8405.inf8405tp1;
 
 
+import android.content.Context;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 
 public class Grille {
@@ -12,8 +15,7 @@ public class Grille {
 	int dimensionX;
 	int dimensionY;
 	Case[][] cases;
-	int TOP_PIXELS = 33;
-	int LEFT_PIXELS = 9;
+
 	
 	ECouleurCase couleurSelectionnee = ECouleurCase.Vide;
 	Case caseSelectionnee = null;
@@ -48,18 +50,12 @@ public class Grille {
 		return 7;
 	}
 	
-	private String getNomNiveau(int niveau)
+	private int getResIdNiveau(int niveau)
 	{
-		String nomNiveau = "Niveau";
-		String sousNiveau = "";
-		String categorie = "7_7_";
-		
-		if(niveau>3)
-			categorie = "8_8_";
-		
-		sousNiveau = Integer.toString(((niveau+2)%3)+1);
-		
-		return categorie+nomNiveau+sousNiveau+".txt";
+
+		String nomNiveau = "niveau"+niveau;
+		Context context = ((Context)gestionnaire).getApplicationContext();
+		return context.getResources().getIdentifier(nomNiveau,"raw", context.getPackageName());
 	}
 	
 	private void initialiseCases()
@@ -78,17 +74,16 @@ public class Grille {
 	
 	private void chargeNiveau(int niveau)
 	{
-		String basePath = "src";
-		String nomNiveau = getNomNiveau(niveau);
 		String levelData = "Error loading level data";
 		
 		//Lire le fichier de donn�es du niveau (Commas separated values)
-		File file = new File(basePath+"\\"+nomNiveau);
-		FileInputStream fis;
+		//File file = ((Context)gestionnaire).getResources().openRawResource(getResIdNiveau(niveau));
+		//File file = new File(basePath+"\\"+nomNiveau);
+		InputStream fis;
 		try
 		{
-			fis = new FileInputStream(file);
-			byte[] data = new byte[(int) file.length()];
+			fis = ((Context)gestionnaire).getResources().openRawResource(getResIdNiveau(niveau));
+			byte[] data = new byte[100];
 			fis.read(data);
 			fis.close();
 			levelData = new String(data, "UTF-8");
@@ -393,6 +388,18 @@ public class Grille {
 		
 		//repaint();
 		//System.out.println(this.toString());
+	}
+
+	public String getBackgroundALaCase(int x, int y)
+	{
+		if (x >= 0 && x < dimensionX && y >=0 && y < dimensionY)
+		{
+			return cases[x][y].GetImageCase();
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	//Notification des observes lors d'une modification de case

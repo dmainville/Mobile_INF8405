@@ -16,14 +16,14 @@ public class ActivitePageIntro extends AppCompatActivity {
     public void facileClique(View view)
     {
         Intent monIntent = new Intent(this, ActiviteJeu.class);
-        monIntent.putExtra("niveau", 71);
+        monIntent.putExtra("niveau", 1);
         startActivity(monIntent);
     }
 
     public void difficileClique(View view)
     {
         Intent monIntent = new Intent(this, ActiviteJeu.class);
-        monIntent.putExtra("niveau",81);
+        monIntent.putExtra("niveau", 4);
         startActivity(monIntent);
     }
 

@@ -214,10 +214,10 @@ public class Case {
 
 			break;
 		case Vide:
-			imagePath = "caseVide.png";
+			imagePath = "case_vide.png";
 			break;
 		default:
-			imagePath = "caseVide.png";
+			imagePath = "case_vide.png";
 			break;
 		}
 			

@@ -1,7 +1,9 @@
 package ca.polymtl.inf8405.inf8405tp1;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -15,7 +17,7 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     final private int MLargeurCase = 150;
     private int mCasesParLigne = 7;
 
-    private int mNiveau = 71;
+    private int mNiveau = 1;
 
     private TableLayout mZoneDeJeu;
     private Grille mGrille;
@@ -29,22 +31,15 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activite_jeu);
 
+        // avant tout, set la zone de jeu
+        mZoneDeJeu = (TableLayout) findViewById(R.id.zoneDeJeu);
 
 
         // Chercher les valeurs passées par l'activité précédente
-        mNiveau = (int) getIntent().getExtras().get("niveau");
-        mCasesParLigne = (int)mNiveau / 10;
-
-        mZoneDeJeu = (TableLayout) findViewById(R.id.zoneDeJeu);
+        int niveau = (int) getIntent().getExtras().get("niveau");
 
         // Appeler la méthode pour faire le setup de la zone de jeu
-        setupNiveau(mNiveau);
-
-
-
-
-
-
+        setupNiveau(niveau);
 
         mZoneDeJeu.setOnTouchListener(mTouchListener);
 
@@ -53,8 +48,20 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
     private void setupNiveau(int niveau)
     {
-        // TODO: ajuster syntaxe niveau
+        // TODO: détruire ancienne table
         // TODO: envoyer un message au modèle pour lui dire dans quel niveau nous sommes
+
+        // sauvegarder le nouveau niveau
+        mNiveau = niveau;
+
+        // calculer le nombre de cases par ligne
+        if (niveau >=4)
+            mCasesParLigne = 8;
+        else
+            mCasesParLigne = 7;
+
+        // créer la grille dans la logique de jeu, en se passant comme observer
+        //mGrille = new Grille(mNiveau, this);
 
 
         // Dynamiquement ajouter des lignes et cellules au tableau
@@ -66,7 +73,6 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
             TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
             row.setLayoutParams(lp);
 
-            row.setBackgroundColor(Color.BLACK);
 
             // Ajouter les cellules
             for (int j = 0; j < mCasesParLigne; ++j)
@@ -77,7 +83,9 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
                 mCases[offset].setMinimumHeight(MLargeurCase);
 
                 // TODO: faire l'appel pour chercher le bon background
-                mCases[offset].setBackgroundColor(Color.RED);
+
+                //String backgroundImagePath = mGrille.getBackgroundALaCase(j, i);
+                //mCases[offset].setBackground(R.drawable. Drawable.createFromPath(backgroundImagePath));
 
                 row.addView(mCases[offset]);
             }
@@ -85,28 +93,29 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
             mZoneDeJeu.addView(row);
 
         }
-
-
-        //TODO: sauvegarder le nouveau niveau, puis appeler setTailleZone
     }
 
-    private void setTailleZone(int puzzleSize) {
-        mCasesParLigne = puzzleSize;
-
-        //TODO: modifier structure de la table
-
-    }
 
     private int getIndexFromXPosition(float xCoord)
     {
-        //TODO:
-        return 0;
+        if (xCoord >= mZoneDeJeu.getWidth())
+            return mCasesParLigne -1;
+        else if (xCoord < 0)
+            return 0;
+
+        int index = (int) (xCoord * mCasesParLigne / mZoneDeJeu.getWidth());
+        return index;
     }
 
     private int getIndexFromYPosition(float yCoord)
     {
-        //TODO:
-        return 0;
+        if (yCoord >= mZoneDeJeu.getHeight())
+            return mCasesParLigne -1;
+        else if (yCoord < 0)
+            return 0;
+
+        int index = (int)(yCoord * mCasesParLigne / mZoneDeJeu.getHeight());
+        return index;
     }
 
     private final View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -115,30 +124,29 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
             {
+                //TODO: nettoyer
                 String myString = "Touch " + Integer.toString(motionEvent.getAction()) + "; " + Float.toString(motionEvent.getX()) + "," + Float.toString(motionEvent.getY());
-                //Toast.makeText(view.getContext(), myString, Toast.LENGTH_SHORT).show();
                 System.out.println(myString);
+                System.out.println(getIndexFromXPosition(motionEvent.getX()) + " " +
+                        getIndexFromYPosition(motionEvent.getY()));
 
                 // calculer l'index dans le tableau du point courant
 
-                mGrille.CliqueCase(
+                /*mGrille.CliqueCase(
                         getIndexFromXPosition(motionEvent.getX()),
                         getIndexFromYPosition(motionEvent.getY()),
                         ETypeClique.Click
-                );
+                );*/
 
             }
 
             else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE)
             {
-                mGrille.CliqueCase(
+                /*mGrille.CliqueCase(
                         getIndexFromXPosition(motionEvent.getX()),
                         getIndexFromYPosition(motionEvent.getY()),
-                        ETypeClique.Drag);
+                        ETypeClique.Drag);*/
             }
-
-            System.out.println("Height: " + mZoneDeJeu.getHeight());
-            System.out.println("Width: " + mZoneDeJeu.getWidth());
 
             return true;
         }
