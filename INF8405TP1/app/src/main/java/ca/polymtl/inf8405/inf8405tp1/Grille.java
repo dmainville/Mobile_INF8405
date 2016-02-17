@@ -2,9 +2,6 @@ package ca.polymtl.inf8405.inf8405tp1;
 
 
 import android.content.Context;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 
@@ -31,17 +28,7 @@ public class Grille {
 		initialiseCases();
 		chargeNiveau(niveau);
 	}
-	
-	Grille()
-	{
-		//Constructeur test, charge le premier niveau
-		
-		this.dimensionX = 7;
-		this.dimensionY = 7;
-		
-		initialiseCases();
-		chargeNiveau(1);
-	}
+
 	
 	private int getDimensionNiveau(int niveau)
 	{
@@ -105,22 +92,7 @@ public class Grille {
 		System.out.println(levelData);
 		
 	}
-	/*
-  public void paint(Graphics g) {
-	  
-	  Graphics2D g2 = (Graphics2D) g;
-	  
-	  for(int i=0; i<dimensionX; i++)
-	  {
-		  for(int j=0; j<dimensionY; j++)
-		  {
-			  Case c = cases[i][j];
-			  g2.drawImage(c.GetImageCase(), c.posX*c.DIMENSION, c.posY*c.DIMENSION, this);	  
-		  }
-	  }
-	  		    
-	  g2.finalize();
-  }*/
+
   
   public String toString()
   {
@@ -412,6 +384,5 @@ public class Grille {
 		if(gestionnaire!=null)
 			gestionnaire.notifyVictoire();
 	}
-	
 
 }

@@ -50,7 +50,6 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     private void setupNiveau(int niveau)
     {
         // TODO: détruire ancienne table
-        // TODO: envoyer un message au modèle pour lui dire dans quel niveau nous sommes
 
         // sauvegarder le nouveau niveau
         mNiveau = niveau;
