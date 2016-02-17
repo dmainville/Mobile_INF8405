@@ -8,11 +8,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActiviteJeu" android:screenOrientation="landscape">
-
-        </activity>
-        <activity android:name=".ActiviteFinPartie" />
-        <activity android:name=".ActivitePageIntro">
+        <activity android:name=".ActiviteJeu" android:screenOrientation="landscape" />
+        <activity android:name=".ActiviteFinPartie" android:screenOrientation="landscape"/>
+        <activity android:name=".ActivitePageIntro" android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

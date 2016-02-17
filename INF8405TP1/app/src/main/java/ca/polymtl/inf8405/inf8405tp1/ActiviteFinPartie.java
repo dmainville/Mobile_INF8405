@@ -3,7 +3,6 @@ package ca.polymtl.inf8405.inf8405tp1;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
 public class ActiviteFinPartie extends AppCompatActivity {
 
@@ -22,14 +21,25 @@ public class ActiviteFinPartie extends AppCompatActivity {
 
         // On donne accès aux boutons pour les niveaux déverrouillés
 
-        System.out.println(deverrouille + "==================================");
-
         findViewById(R.id.facile1).setEnabled((deverrouille & 0b1) != 0);
+        findViewById(R.id.facile1).setVisibility(((deverrouille & 0b1) != 0) ? View.VISIBLE : View.GONE);
         findViewById(R.id.facile2).setEnabled((deverrouille & 0b10) != 0);
+        findViewById(R.id.facile2).setVisibility(((deverrouille & 0b10) != 0) ? View.VISIBLE : View.GONE);
         findViewById(R.id.facile3).setEnabled((deverrouille & 0b100) != 0);
+        findViewById(R.id.facile3).setVisibility(((deverrouille & 0b100) != 0) ? View.VISIBLE : View.GONE);
         findViewById(R.id.difficile1).setEnabled((deverrouille & 0b1000) != 0);
+        findViewById(R.id.difficile1).setVisibility(((deverrouille & 0b1000) != 0) ? View.VISIBLE : View.GONE);
         findViewById(R.id.difficile2).setEnabled((deverrouille & 0b10000) != 0);
+        findViewById(R.id.difficile2).setVisibility(((deverrouille & 0b10000) != 0) ? View.VISIBLE : View.GONE);
         findViewById(R.id.difficile3).setEnabled((deverrouille & 0b100000) != 0);
+        findViewById(R.id.difficile3).setVisibility(((deverrouille & 0b100000) != 0) ? View.VISIBLE : View.GONE);
+
+        // Si on est au dernier niveau, on ne met pas de prochain niveau
+        if (mNiveauCourant >= 6)
+        {
+            findViewById(R.id.prochain).setEnabled(false);
+            findViewById(R.id.prochain).setVisibility(View.GONE);
+        }
 
 
     }

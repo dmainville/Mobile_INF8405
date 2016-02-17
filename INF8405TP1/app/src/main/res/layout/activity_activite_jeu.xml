@@ -30,8 +30,18 @@
         android:layout_height="wrap_content"
         android:text="Gagner Partie"
         android:id="@+id/button"
+        android:onClick="gagnerPartie"
+        android:layout_below="@+id/bouttonQuitter"
+        android:layout_alignEnd="@+id/textNiveau"
+        android:layout_marginTop="78dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Niveau"
+        android:id="@+id/textNiveau"
         android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="gagnerPartie" />
+        android:layout_alignEnd="@+id/bouttonQuitter" />
 
 </RelativeLayout>
