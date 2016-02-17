@@ -352,7 +352,11 @@ public class Grille {
 					
 					
 					if(caseSelectionnee.caseSuivante != null && caseSelectionnee.caseSuivante.etat == EEtatCase.Depart)
+					{
 						caseSelectionnee.caseSuivante.posRelativeSuivant = EPositionRelative.Invalide;
+						notifyCase(caseSelectionnee.caseSuivante);
+					}
+
 					
 					c.etat = EEtatCase.Occupe;
 					c.couleur = couleurSelectionnee;
