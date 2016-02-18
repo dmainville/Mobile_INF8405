@@ -14,10 +14,11 @@
         android:layout_height="wrap_content"
         android:text="@string/facile1"
         android:id="@+id/facile1"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:onClick="facile1Clique"
-        android:enabled="false" />
+        android:enabled="false"
+        android:layout_below="@+id/textProchain"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -87,6 +88,24 @@
         android:enabled="true"
         android:onClick="quitterClique"
         android:layout_alignParentBottom="true"
-        android:layout_alignEnd="@+id/difficile3"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/gagne"
+        android:id="@+id/textGagne"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/prochainTexte"
+        android:id="@+id/textProchain"
+        android:layout_below="@+id/textGagne"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp" />
 </RelativeLayout>

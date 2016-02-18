@@ -49,7 +49,7 @@ public class Grille {
 	{
 		int nbConnexions = 0;
 			
-		boolean[] connexion = new boolean[ECouleurCase.NbElements]
+		boolean[] connexion = new boolean[ECouleurCase.NbElements.ordinal()];
 		for(int i=0; i<10; i++)
 		{
 			connexion[i] = false;
@@ -67,10 +67,10 @@ public class Grille {
 				  if(c.posRelativeSuivant == EPositionRelative.Invalide)
 					  continue;
 				  
-				  if(connexion[c.couleur])
+				  if(connexion[c.couleur.ordinal()])
 					  nbConnexions++;
 				  else
-					  connexion[c.couleur] = true;
+					  connexion[c.couleur.ordinal()] = true;
 			  }
 		  }
 		  
@@ -180,7 +180,7 @@ public class Grille {
 		notifyCase(c);
 		
 		c.caseSuivante = null;
-		
+		notifyNbConnexion(getNombreConnexions());
   	}
   	
   	public void EffaceCouleur(ECouleurCase couleur)
@@ -212,6 +212,7 @@ public class Grille {
 				}
 			}
 		}
+		notifyNbConnexion(getNombreConnexions());
 	}
 
   	
@@ -332,7 +333,7 @@ public class Grille {
 				
 				//Essayer de connecter avec la fin si possible
 				if(connecteCaseFinale(c))
-					notifyNbConnexion(getNombreConnexions);
+					notifyNbConnexion(getNombreConnexions());
 				
 				break;
 				
@@ -377,7 +378,7 @@ public class Grille {
 					//Essayer de connecter avec la fin si possible
 					if(connecteCaseFinale(c))
 					{
-						notifyNbConnexion(getNombreConnexions);
+						notifyNbConnexion(getNombreConnexions());
 						if(testVictoire())
 							notifyVictoire();
 					}
@@ -422,7 +423,7 @@ public class Grille {
 	
 	public void notifyNbConnexion(int nbConnexion)
 	{
-		if(gestionnaire!=null)
+		if(gestionnaire != null)
 			gestionnaire.notifyNbConnexion(nbConnexion);
 	}
 

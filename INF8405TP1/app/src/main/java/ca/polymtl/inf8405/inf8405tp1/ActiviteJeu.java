@@ -1,5 +1,8 @@
 package ca.polymtl.inf8405.inf8405tp1;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
@@ -72,6 +76,8 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
         // Set le nom du nouveau niveau à l'écran
         setNomNiveau(mNiveau);
+        // Set le nombre de connexions à l'écran
+        setNombreConnexionsDisplay(mGrille.getNombreConnexions());
 
         // Dynamiquement ajouter des lignes et cellules au tableau
         for (int i = 0; i < mCasesParLigne; ++i)
@@ -97,6 +103,10 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
         }
     }
 
+    public void reinitialiserPartie(View view)
+    {
+        setupNiveau(mNiveau);
+    }
 
     private int getIndexFromXPosition(float xCoord)
     {
@@ -161,7 +171,6 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         super.onActivityResult(requestCode, resultCode, intent);
-        //TODO: gérer le setup avec les nouvelles donnée ou quitter si quit.
         switch (requestCode)
         {
             case 0: // code pour fin partie
@@ -201,10 +210,37 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
 
     private void quitterPartie()
     {
-        // TODO: gérer popup confirmation
-        //Todo: confirmer, détruire, retourner au menu principal
+        // Ce n'est pas la peine de créer une classe séparer, on gère le alert ici.
 
-        finish();
+        String titre = getString(R.string.quitAlertTitle);
+        String texte = getString(R.string.quitAlertText);
+        String quitter = getString(R.string.quit);
+        String annuler = getString(R.string.annuler);
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int which)
+            {
+                if (which == DialogInterface.BUTTON_POSITIVE)
+                {
+                    finish();
+                }
+                else
+                {
+                    dialog.dismiss();
+                }
+            }
+        };
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(titre);
+        alertDialog.setMessage(texte);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, quitter,listener);
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, annuler, listener);
+        alertDialog.show();
+
+
+        //finish();
     }
 
     // change le texte affichant la partie en cours
@@ -214,20 +250,32 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
         switch (niveau)
         {
             case 1:
-                t.setText(R.string.niveau + ": " + R.string.facile1);
+                t.setText(R.string.facile1);
+                break;
             case 2:
-                t.setText(R.string.niveau + ": " + R.string.facile2);
+                t.setText(R.string.facile2);
+                break;
             case 3:
-                t.setText(R.string.niveau + ": " + R.string.facile3);
+                t.setText(R.string.facile3);
+                break;
             case 4:
-                t.setText(R.string.niveau + ": " + R.string.difficile1);
+                t.setText(R.string.difficile1);
+                break;
             case 5:
-                t.setText(R.string.niveau + ": " + R.string.difficile2);
+                t.setText(R.string.difficile2);
+                break;
             case 6:
-                t.setText(R.string.niveau + ": " + R.string.difficile3);
+                t.setText(R.string.difficile3);
+                break;
             default:
-                t.setText(R.string.niveau + ": " + "??");
+                t.setText("??");
+                break;
         }
+    }
+
+    private void setNombreConnexionsDisplay(int nbConnexion)
+    {
+        ((TextView) findViewById(R.id.nbConnexion)).setText(Integer.toString(nbConnexion));
     }
 
     public void notifyVictoire()
@@ -238,6 +286,12 @@ public class ActiviteJeu extends AppCompatActivity implements IObserver {
     public void notifyCase(Case c)
     {
         int backgroundImageID = mGrille.getBackgroundIdALaCase(c.posX, c.posY);
-        mCases[c.posY*mCasesParLigne + c.posX].setBackground(ContextCompat.getDrawable(getApplicationContext(),backgroundImageID));
+        mCases[c.posY*mCasesParLigne + c.posX].setBackground(ContextCompat.getDrawable(getApplicationContext(), backgroundImageID));
     }
+
+    public void notifyNbConnexion(int nbConnexion)
+    {
+        setNombreConnexionsDisplay(nbConnexion);
+    }
+
 }

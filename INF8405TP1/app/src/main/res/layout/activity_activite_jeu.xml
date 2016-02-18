@@ -7,33 +7,36 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".ActiviteJeu">
+    tools:context=".ActiviteJeu"
+    android:background="@drawable/background">
 
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/zoneDeJeu"></GridLayout>
+        android:id="@+id/zoneDeJeu"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"></GridLayout>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/quit"
-        android:id="@+id/bouttonQuitter"
+        android:id="@+id/boutonQuitter"
         android:enabled="true"
         android:onClick="quitterJeuClique"
         android:nestedScrollingEnabled="false"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Gagner Partie"
-        android:id="@+id/button"
+        android:text="Gagner Partie (debug)"
+        android:id="@+id/boutonMagiqueGagner"
         android:onClick="gagnerPartie"
-        android:layout_below="@+id/bouttonQuitter"
-        android:layout_alignEnd="@+id/textNiveau"
-        android:layout_marginTop="78dp" />
+        android:layout_below="@+id/reinitialiser"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,6 +45,44 @@
         android:text="Niveau"
         android:id="@+id/textNiveau"
         android:layout_centerVertical="true"
-        android:layout_alignEnd="@+id/bouttonQuitter" />
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/reinitialiser"
+        android:id="@+id/reinitialiser"
+        android:onClick="reinitialiserPartie"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/niveauLabel"
+        android:id="@+id/textNiveauLabel"
+        android:layout_alignTop="@+id/textNiveau"
+        android:layout_toStartOf="@+id/textNiveau"
+        android:layout_marginRight="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/nbConnexionsLabel"
+        android:id="@+id/nbConnexionLabel"
+        android:layout_alignTop="@+id/nbConnexion"
+        android:layout_toStartOf="@+id/nbConnexion"
+        android:layout_marginRight="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/nbConnexionsLabel"
+        android:id="@+id/nbConnexion"
+        android:layout_below="@+id/textNiveau"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

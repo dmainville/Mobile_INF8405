@@ -29,7 +29,6 @@ public class ActivitePageIntro extends AppCompatActivity {
 
     public void quitterClique(View view)
     {
-        //Todo: quit
         finish();
     }
 }

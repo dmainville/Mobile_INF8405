@@ -7,10 +7,14 @@
     <string name="dim7">7x7</string>
     <string name="dim8">8x8</string>
 
-    <string name="rejouer">Rejouer</string>
+    <string name="reinitialiser">Réinitialiser</string>
     <string name="quit">Quitter</string>
+    <string name="annuler">Annuler</string>
 
-    <string name="niveau">Niveau</string>
+    <string name="niveauLabel">Niveau: </string>
+    <string name="nbConnexionsLabel">Tubes formées: </string>
+
+    <string name="gagne">Partie gagnée!</string>
 
     <string name="facile1">Facile 1</string>
     <string name="facile2">Facile 2</string>
@@ -21,6 +25,9 @@
     <string name="difficile3">Difficile 3</string>
 
     <string name="prochain">Prochain niveau</string>
+    <string name="prochainTexte">Sélectionnez un niveau</string>
 
+    <string name="quitAlertTitle">Quitter le jeu</string>
+    <string name="quitAlertText">Êtes-vous sûr de vouloir quitter le jeu? Votre progrès sera perdu.</string>
 
 </resources>
