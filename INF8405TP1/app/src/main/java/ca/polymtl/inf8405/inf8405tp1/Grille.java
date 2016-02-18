@@ -44,6 +44,38 @@ public class Grille {
 		Context context = ((Context)gestionnaire).getApplicationContext();
 		return context.getResources().getIdentifier(nomNiveau,"raw", context.getPackageName());
 	}
+
+	public int getNombreConnexions()
+	{
+		int nbConnexions = 0;
+			
+		boolean[] connexion = new boolean[ECouleurCase.NbElements]
+		for(int i=0; i<10; i++)
+		{
+			connexion[i] = false;
+		}
+			
+		  for(int i=0; i<dimensionX; i++)
+		  {
+			  for(int j=0; j<dimensionY; j++)
+			  {
+				  Case c = cases[j][i];
+				  
+				  if(c.etat != EEtatCase.Depart)
+					  continue;
+				  
+				  if(c.posRelativeSuivant == EPositionRelative.Invalide)
+					  continue;
+				  
+				  if(connexion[c.couleur])
+					  nbConnexions++;
+				  else
+					  connexion[c.couleur] = true;
+			  }
+		  }
+		  
+		return nbConnexions;
+	}
 	
 	private void initialiseCases()
 	{
@@ -299,7 +331,8 @@ public class Grille {
 				caseSelectionnee = c;
 				
 				//Essayer de connecter avec la fin si possible
-				connecteCaseFinale(c);
+				if(connecteCaseFinale(c))
+					notifyNbConnexion(getNombreConnexions);
 				
 				break;
 				
@@ -344,6 +377,7 @@ public class Grille {
 					//Essayer de connecter avec la fin si possible
 					if(connecteCaseFinale(c))
 					{
+						notifyNbConnexion(getNombreConnexions);
 						if(testVictoire())
 							notifyVictoire();
 					}
@@ -384,6 +418,12 @@ public class Grille {
 	{
 		if(gestionnaire!=null)
 			gestionnaire.notifyVictoire();
+	}
+	
+	public void notifyNbConnexion(int nbConnexion)
+	{
+		if(gestionnaire!=null)
+			gestionnaire.notifyNbConnexion(nbConnexion);
 	}
 
 }
