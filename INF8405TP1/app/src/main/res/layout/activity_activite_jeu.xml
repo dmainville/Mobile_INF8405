@@ -45,7 +45,8 @@
         android:text="Niveau"
         android:id="@+id/textNiveau"
         android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:background="#ffffff" />
 
     <Button
         android:layout_width="wrap_content"
@@ -64,7 +65,8 @@
         android:id="@+id/textNiveauLabel"
         android:layout_alignTop="@+id/textNiveau"
         android:layout_toStartOf="@+id/textNiveau"
-        android:layout_marginRight="5dp" />
+        android:layout_marginRight="5dp"
+        android:background="#ffffff" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -74,15 +76,17 @@
         android:id="@+id/nbConnexionLabel"
         android:layout_alignTop="@+id/nbConnexion"
         android:layout_toStartOf="@+id/nbConnexion"
-        android:layout_marginRight="5dp" />
+        android:layout_marginRight="5dp"
+        android:background="#ffffff" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/nbConnexionsLabel"
+        android:text="0"
         android:id="@+id/nbConnexion"
         android:layout_below="@+id/textNiveau"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:background="#ffffff" />
 
 </RelativeLayout>
