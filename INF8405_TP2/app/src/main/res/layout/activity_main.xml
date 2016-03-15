@@ -1,0 +1,174 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="polymtl.inf8405_tp2.MainActivity">
+
+    <ViewSwitcher
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewSwitcher" >
+
+        <ScrollView
+            android:id="@+id/login_form"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/email_login_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/group_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/prompt_group_name"
+                    android:imeActionId="@+id/login"
+                    android:imeActionLabel="@string/action_sign_in"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+                <EditText
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/group_name"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+                <ImageView
+                    android:id="@+id/photo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_below="@id/email"
+                    android:contentDescription="@string/prompt_picture"
+                    android:src="@drawable/no_profile_image"
+                    android:clickable="true" />
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:text="@string/prompt_organisateur"
+                    android:id="@+id/organisateur"
+                    android:layout_marginStart="128dp"
+                    android:layout_alignTop="@+id/photo"
+                    android:layout_toEndOf="@+id/photo" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Preferences"
+                    android:id="@+id/btn_preferences"
+                    android:layout_above="@+id/btn_login"
+                    android:layout_alignStart="@+id/organisateur" />
+
+                <Button
+                    android:id="@+id/btn_login"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_below="@id/photo"
+                    android:text="@string/action_sign_in"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:id="@+id/horizontalScrollView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/btn_preferences"
+                    android:layout_toEndOf="@+id/btn_preferences"
+                    android:layout_alignTop="@+id/btn_preferences"
+                    android:layout_marginLeft="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="Ajoute des preferences"
+                        android:id="@+id/login_preferences"
+                        android:maxLines="1"
+                        android:gravity="center" />
+                </HorizontalScrollView>
+
+            </RelativeLayout>
+        </ScrollView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/new_preference"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:hint="Ajouter une nouvelle preference"
+                android:textSize="15sp"
+                android:layout_toStartOf="@+id/btn_add_preference" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ajouter"
+                android:id="@+id/btn_add_preference"
+                android:layout_above="@+id/listView_preferences"
+                android:layout_alignEnd="@+id/btn_list_confirm" />
+
+            <ListView
+                android:id="@+id/listView_preferences"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/new_preference"
+                android:layout_marginTop="15sp"
+                android:layout_above="@+id/btn_list_confirm"
+                android:choiceMode="multipleChoice"
+                android:clickable="true" />
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/btn_list_confirm"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/btn_list_confirm"
+                android:layout_below="@+id/listView_preferences"
+                android:layout_marginTop="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text=""
+                    android:id="@+id/ordered_list"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/btn_list_confirm"
+                    android:layout_below="@+id/listView_preferences" />
+
+            </HorizontalScrollView>
+
+            <Button
+                android:id="@+id/btn_list_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Confirm"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true" />
+
+
+        </RelativeLayout>
+
+    </ViewSwitcher>
+
+</LinearLayout>
