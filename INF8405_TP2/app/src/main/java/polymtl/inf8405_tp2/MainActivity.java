@@ -20,6 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -42,7 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView mOrderedList;
     private TextView mLoginPreferences;
 
+    // Acutal application data
     private ArrayList<String> ordrePreferences;
+    ArrayList<String> values = new  ArrayList<>(Arrays.asList("Restaurant", "Café", "Parc", "Pizzéria", "Cafétéria", "École", "Maison"));
+    ArrayAdapter<String> adapter;
+    private UserProfile currentProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         ordrePreferences = new ArrayList<>();
 
         initializeListener();
+        LoadInitialProfile();
     }
 
     @Override
@@ -83,7 +92,83 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void LoadInitialProfile()
+    {
+        currentProfile = new UserProfile();
+        File file = new File(this.getApplicationContext().getFilesDir(), UserProfile.PROFILE_FILE);
+
+        if(!file.exists())
+        {
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Could not find a profile to load!", Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
+        StringBuilder text = new StringBuilder();
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+        }
+        catch (IOException e) {
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 1", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+        if(currentProfile.LoadProfile(text.toString()))
+        {
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Profile loaded successfully!", Toast.LENGTH_SHORT);
+            toast.show();
+
+            AjustFieldsToProfile();
+        }
+        else
+        {
+            /*Toast t = Toast.makeText(this.getApplicationContext(),text.toString(), Toast.LENGTH_LONG);
+            t.show();*/
+
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 2", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
+
+    public void AjustFieldsToProfile()
+    {
+        /*currentProfile.groupName = mGroupName.getText().toString();
+        currentProfile.email = mEmail.getText().toString();
+        currentProfile.preferences = CreateTextPreferences();
+        currentProfile.organizer = mOrganisateur.isChecked();*/
+
+        mGroupName.setText(currentProfile.groupName);
+        mEmail.setText(currentProfile.email);
+        mOrganisateur.setChecked(currentProfile.organizer);
+        LoadTextPreferences();
+    }
+
+    public void SaveCurrentProfile()
+    {
+        if(currentProfile == null)
+            return;
+
+        if(!currentProfile.SaveProfile(this.getApplicationContext()))
+        {
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed saving user profile!", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+        Toast toast = Toast.makeText(this.getApplicationContext(), "Profile saved locally!", Toast.LENGTH_SHORT);
+        toast.show();
+
+    }
+
     public void initializeListener() {
+
         mBtnPreferences.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final ArrayList<String> values = new  ArrayList<>(Arrays.asList("Restaurant", "Café", "Parc", "Pizzéria", "Cafétéria", "École", "Maison"));
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, values);
+
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, values);
         mListViewPreferences.setAdapter(adapter);
 
         mListViewPreferences.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -129,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         mBtnAddPreference.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mNewPreference.getText().length() > 0) {
+                if (mNewPreference.getText().length() > 0 && !values.contains(mNewPreference.getText().toString())) {
                     values.add(mNewPreference.getText().toString());
                     adapter.notifyDataSetChanged();
                 }
@@ -173,12 +258,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean VerifyInformation() {
         boolean returnValue = true;
 
+        mGroupName.setBackgroundColor(Color.parseColor("#FFFFFF"));
         if (mGroupName.getText().length() == 0) {
             mGroupName.setBackgroundColor(Color.parseColor("#fd8282"));
             returnValue = false;
         }
 
-        if (!mEmail.toString().contains("@")) {
+        mEmail.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        if (!mEmail.getText().toString().contains("@")) {
             mEmail.setBackgroundColor(Color.parseColor("#fd8282"));
             returnValue = false;
         }
@@ -194,6 +281,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void Register() {
 
+        currentProfile.groupName = mGroupName.getText().toString();
+        currentProfile.email = mEmail.getText().toString();
+        currentProfile.preferences = CreateTextPreferences();
+        currentProfile.organizer = mOrganisateur.isChecked();
+
+        SaveCurrentProfile();
     }
 
     public String CreateTextPreferences(){
@@ -204,5 +297,39 @@ public class MainActivity extends AppCompatActivity {
             text += i + 1 + ": " + ordrePreferences.get(i);
         }
         return text;
+    }
+
+    public void LoadTextPreferences()
+    {
+        String[] prefs = currentProfile.preferences.split(",");
+
+        for(int i=0; i<prefs.length; i++)
+        {
+            String currentPref = prefs[i].split(":")[1].trim();
+            ordrePreferences.add(currentPref);
+
+            int index = FindPreferenceItem(currentPref);
+            if(index == -1)
+            {
+                values.add(currentPref);
+                adapter.notifyDataSetChanged();
+                mListViewPreferences.setItemChecked(values.size()-1,true);
+            }
+            else
+            {
+                mListViewPreferences.setItemChecked(index,true);
+            }
+        }
+    }
+
+    public int FindPreferenceItem(String itemName)
+    {
+        for(int i=0; i<mListViewPreferences.getCount(); i++)
+        {
+            if(itemName.equals( mListViewPreferences.getItemAtPosition(i).toString()))
+                return i;
+        }
+
+        return -1;
     }
 }
