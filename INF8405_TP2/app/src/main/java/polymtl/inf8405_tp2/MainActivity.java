@@ -159,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void startWaitingRoomActivity()
     {
+        //TODO autoriser seulement un admin par room
+
         Intent intent = new Intent(this, WaitingRoomActivity.class);
         intent.putExtra("profile", currentProfile);
         startActivityForResult(intent, REQUEST_CODE_WAITING_ROOM_ACTIVITY);

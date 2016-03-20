@@ -8,9 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private ArrayList<String> mArrayList;
 
     private Button mAdminStartButton;
+    private Firebase myFirebaseGroupRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,34 +42,34 @@ public class WaitingRoomActivity extends AppCompatActivity {
         mArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mArrayList);
         mReadyUsersList.setAdapter(mArrayAdapter);
 
-        // assigner la référence pour le bouton
-        //TODO: faire ceci seulement si on est admin. Sinon, rendre le bouton invisible.
-        mAdminStartButton = (Button) findViewById(R.id.adminStartButton);
-
         // recueillir les valeurs passées
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
 
+        // assigner la référence pour le bouton
+        mAdminStartButton = (Button) findViewById(R.id.adminStartButton);
+        if(mCurrentProfile.organizer)
+            mAdminStartButton.setVisibility(View.VISIBLE);
+        else
+            mAdminStartButton.setVisibility(View.INVISIBLE);
 
         //setup la connexion à la BD
         Firebase.setAndroidContext(this);
 
-        final Firebase myFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+        myFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
                 .child("readyGroups")
                 .child(mCurrentProfile.groupName);
 
         // TODO: chercher la liste des usagers qui sont déjà prêts (créer une fonction pour ça et remplacer le contenu de onDataChange pour qu'il appelle cette fonction)
-
+        //Pas sur que c'est nécessaire. Puisqu'on ajoute notre user, le onChange est callé et popule la liste.
 
         // Ajouter un event listener pour s'il y a changement aux membres prêts pour ce groupe
         myFirebaseGroupRef.addValueEventListener(new ValueEventListener() {
             //TODO: Opter plutot pour onChildAdded et onChildChanged pour éviter d'avoir à réécrire la liste complète à chaque fois
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                //TODO: Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
-                if (snapshot.hasChild("readyState"))
-                {
-                    if((Boolean) snapshot.child("readyState").getValue())
-                    {
+                //Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
+                if (snapshot.hasChild("readyState")) {
+                    if ((Boolean) snapshot.child("readyState").getValue()) {
                         // Move to next activity
                         startVoteMapActivity();
                         // TODO: Stop this current activity? (remove from history stack)
@@ -76,11 +79,11 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
                 // TODO: Il faut effectuer un fetch au début, au cas où il y aurait déjà du monde ready.
 
-                if (snapshot.hasChild("members"))
-                {
+                if (snapshot.hasChild("members")) {
                     mArrayList.clear();
                     mArrayList.addAll(((Map<String, Object>) snapshot.child("members").getValue()).keySet());
                     mArrayAdapter.notifyDataSetChanged();
+                    System.out.println("NEW MEMBER DETECTED");
                 }
             }
 
@@ -118,5 +121,37 @@ public class WaitingRoomActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CODE_VOTE_MAP_ACTIVITY);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //Tentative de remove le user lorsqu'il quitte et que le groupe n'est pas rdy.
+        //Mais je ne suis pas sur de comment query
+        /*Query q = myFirebaseGroupRef;
+        q.addChildEventListener(new ChildEventListener() {
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                System.out.println("LEAVING QUERY");
+                if(!snapshot.hasChild("readyState"))
+                {
+                    myFirebaseGroupRef.child("members").child(mCurrentProfile.getSanitizedEmail()).removeValue();
+                    System.out.println("REMOVED USER");
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) { }
+        });
+
+        System.out.println("ACTIVITY STOPPED, WAITING ROOM");*/
+    }
 
 }
