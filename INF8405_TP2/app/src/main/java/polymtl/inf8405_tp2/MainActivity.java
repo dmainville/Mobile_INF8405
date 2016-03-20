@@ -20,10 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -95,33 +93,18 @@ public class MainActivity extends AppCompatActivity {
     public void LoadInitialProfile()
     {
         currentProfile = new UserProfile();
-        File file = new File(this.getApplicationContext().getFilesDir(), UserProfile.PROFILE_FILE);
+        FileInputStream file;
 
-        if(!file.exists())
-        {
+        try {
+            file = openFileInput(UserProfile.PROFILE_FILE);
+        } catch (FileNotFoundException e) {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Could not find a profile to load!", Toast.LENGTH_SHORT);
             toast.show();
+            e.printStackTrace();
             return;
         }
 
-        StringBuilder text = new StringBuilder();
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
-            }
-            br.close();
-        }
-        catch (IOException e) {
-            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 1", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
-        if(currentProfile.LoadProfile(text.toString()))
+        if(currentProfile.LoadProfile(file))
         {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Profile loaded successfully!", Toast.LENGTH_SHORT);
             toast.show();
@@ -130,9 +113,6 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            /*Toast t = Toast.makeText(this.getApplicationContext(),text.toString(), Toast.LENGTH_LONG);
-            t.show();*/
-
             Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 2", Toast.LENGTH_SHORT);
             toast.show();
         }
@@ -140,15 +120,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void AjustFieldsToProfile()
     {
-        /*currentProfile.groupName = mGroupName.getText().toString();
-        currentProfile.email = mEmail.getText().toString();
-        currentProfile.preferences = CreateTextPreferences();
-        currentProfile.organizer = mOrganisateur.isChecked();*/
-
         mGroupName.setText(currentProfile.groupName);
         mEmail.setText(currentProfile.email);
         mOrganisateur.setChecked(currentProfile.organizer);
         LoadTextPreferences();
+        mLoginPreferences.setText(CreateTextPreferences());
     }
 
     public void SaveCurrentProfile()
@@ -158,12 +134,21 @@ public class MainActivity extends AppCompatActivity {
 
         if(!currentProfile.SaveProfile(this.getApplicationContext()))
         {
-            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed saving user profile!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this.getApplicationContext(), "Failed saving user profile locally!", Toast.LENGTH_SHORT);
             toast.show();
         }
 
         Toast toast = Toast.makeText(this.getApplicationContext(), "Profile saved locally!", Toast.LENGTH_SHORT);
         toast.show();
+
+        if(!currentProfile.SaveProfileRemotely(this.getApplicationContext()))
+        {
+            Toast toast2 = Toast.makeText(this.getApplicationContext(), "Failed saving user profile remotely!", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+        Toast toast2 = Toast.makeText(this.getApplicationContext(), "Profile saved remotely!", Toast.LENGTH_SHORT);
+        toast2.show();
 
     }
 

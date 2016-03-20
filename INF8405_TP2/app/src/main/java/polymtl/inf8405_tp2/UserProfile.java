@@ -1,6 +1,12 @@
 package polymtl.inf8405_tp2;
 import android.content.Context;
+
+import com.firebase.client.Firebase;
+
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Created by David on 2016-03-15.
@@ -12,7 +18,7 @@ public class UserProfile {
 
     String groupName;
     String email;
-    String preferences; //Commat separated format
+    String preferences; //Comma separated format
     Boolean organizer;
     //TODO add Some var type de save the current location
 
@@ -24,13 +30,14 @@ public class UserProfile {
     public Boolean SaveProfile(Context applicationContext)
     {
         String filename = PROFILE_FILE;
-        String string = this.ToString();
+        Properties props = this.ToString();
         FileOutputStream outputStream;
 
 
         try {
             outputStream = applicationContext.openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
+            //outputStream.write(string.getBytes());
+            props.store(outputStream, null);
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,36 +48,51 @@ public class UserProfile {
         return true;
     }
 
-    public Boolean LoadProfile(String data)
+    public Boolean SaveProfileRemotely(Context applicationContext)
     {
-        String[] values = data.split(";");
+        // Nous n'avons pas vraiment besons d'associer le contexte à Firebase
+        // parce qu'on ne lit jamais le résultat. Donc on peut le faire ici
+        // au lieu de le mettre dans onCreate de l'applicationContext.
+        // On peut changer ceci si nécessaire.
+        Firebase.setAndroidContext(applicationContext);
 
-        System.out.println("lenght : "+values.length);
-        if(values.length != 4)
-            return false;
+        Firebase myFirebaseRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/");
 
-        this.groupName = values[0];
-        this.email = values[1];
-
-        this.organizer = false;
-        if(values[2].equals("1"))
-            this.organizer = true;
-
-        this.preferences = values[3];
+        // Utiliser l'adresse courriel comme clé, en enlevant les caractères non acceptés de Firebase '.', '#', '$', '[', ']', '/'
+        // TODO: On devrait échapper ASCII 0-31 + 127
+        myFirebaseRef.child("UserProfiles").child(email.replaceAll("[\\.#$\\[\\]/]", "")).setValue(this.ToString());
 
         return true;
     }
 
-    public String ToString()
+    public Boolean LoadProfile(InputStream in)
     {
-        String strProfile = "";
-        String strOrganizer = "0";
-        if(organizer)
-            strOrganizer = "1";
+        Properties props = new Properties();
 
+        try {
+            props.load(in);
+        } catch (IOException e) {
+            System.err.println("Unable to read from stream");
+            e.printStackTrace();
+            return false;
+        }
 
-        strProfile = groupName+";"+email+";"+strOrganizer+";"+preferences;
+        groupName = props.getProperty("groupname");
+        email = props.getProperty("email");
+        organizer = Boolean.valueOf(props.getProperty("organizer"));
+        preferences = props.getProperty("preferences");
 
-        return strProfile;
+        return true;
+    }
+
+    public Properties ToString()
+    {
+        Properties result = new Properties();
+        result.setProperty("groupname", groupName);
+        result.setProperty("email", email);
+        result.setProperty("organizer", String.valueOf(organizer));
+        result.setProperty("preferences", preferences);
+
+        return result;
     }
 }
