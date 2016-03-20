@@ -28,6 +28,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
     final private int REQUEST_CODE_PICTURE = 1;
     final private int REQUEST_CODE_IMAGE = 2;
+    final private int REQUEST_CODE_WAITING_ROOM_ACTIVITY = 3;
 
     // UI references.
     private ViewSwitcher mViewSwitcher;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         ordrePreferences = new ArrayList<>();
 
-        initializeListener();
+        initializeListener(); //< Ajouter les listeners aux boutons
         LoadInitialProfile();
     }
 
@@ -84,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
                 case REQUEST_CODE_IMAGE:
                     break;
                 case REQUEST_CODE_PICTURE:
+                    break;
+                case REQUEST_CODE_WAITING_ROOM_ACTIVITY:
+                    break;
+                default:
                     break;
             }
 
@@ -152,6 +157,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void startWaitingRoomActivity()
+    {
+        Intent intent = new Intent(this, WaitingRoomActivity.class);
+        intent.putExtra("profile", currentProfile);
+        startActivityForResult(intent, REQUEST_CODE_WAITING_ROOM_ACTIVITY);
+    }
+
     public void initializeListener() {
 
         mBtnPreferences.setOnClickListener(new View.OnClickListener() {
@@ -172,7 +184,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (VerifyInformation())
+                {
                     Register();
+                    // Procéder à la prochaine activité
+                    startWaitingRoomActivity();
+                }
             }
         });
 

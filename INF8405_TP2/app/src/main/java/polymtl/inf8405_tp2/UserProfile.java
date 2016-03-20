@@ -6,12 +6,13 @@ import com.firebase.client.Firebase;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Properties;
 
 /**
  * Created by David on 2016-03-15.
  */
-public class UserProfile {
+public class UserProfile implements Serializable{
 
     //Consts
     static String PROFILE_FILE = "userProfile.txt";
@@ -27,10 +28,15 @@ public class UserProfile {
 
     }
 
+    public String getSanitizedEmail()
+    {
+        return email.replaceAll("[\\.#$\\[\\]/]", "");
+    }
+
     public Boolean SaveProfile(Context applicationContext)
     {
         String filename = PROFILE_FILE;
-        Properties props = this.ToString();
+        Properties props = this.ToProperties();
         FileOutputStream outputStream;
 
 
@@ -60,7 +66,7 @@ public class UserProfile {
 
         // Utiliser l'adresse courriel comme clé, en enlevant les caractères non acceptés de Firebase '.', '#', '$', '[', ']', '/'
         // TODO: On devrait échapper ASCII 0-31 + 127
-        myFirebaseRef.child("UserProfiles").child(email.replaceAll("[\\.#$\\[\\]/]", "")).setValue(this.ToString());
+        myFirebaseRef.child("UserProfiles").child(getSanitizedEmail()).setValue(this.ToProperties());
 
         return true;
     }
@@ -85,7 +91,7 @@ public class UserProfile {
         return true;
     }
 
-    public Properties ToString()
+    public Properties ToProperties()
     {
         Properties result = new Properties();
         result.setProperty("groupname", groupName);
