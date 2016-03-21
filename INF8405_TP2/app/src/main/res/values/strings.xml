@@ -15,4 +15,5 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCJaYOPnI1fOK38Ikdxk6xkkBdjiofbZk4</string>
 </resources>
