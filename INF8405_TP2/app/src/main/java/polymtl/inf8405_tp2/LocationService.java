@@ -1,49 +1,30 @@
 package polymtl.inf8405_tp2;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 
 /**
  * Created by Thomas on 22/03/2016.
  */
-public class LocationService{
-    Location currentLocation;
-    Location[] membersLocation;
+public class LocationService implements LocationListener{
+    Location currentLocation = null;
 
-    public LocationService(){
-        LocationManager lm = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
-        currentLocation = new Location("Test");
-        currentLocation.setLatitude(50);
-        currentLocation.setLongitude(75);
-
-        membersLocation = new Location[0];
-    }
-
-    public Location triangulateLocation(){
-        Location locTemp = new Location("Meeting Location");
-        double longitude = currentLocation.getLongitude();
-        double latitude = currentLocation.getLatitude();
-
-        for(int i = 0; i<membersLocation.length; i++){
-            longitude += membersLocation[i].getLongitude();
-            latitude += membersLocation[i].getLatitude();
+    public LocationService(MainActivity context) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+            return;
         }
-        longitude = longitude/(membersLocation.length+1);
-        latitude = latitude/(membersLocation.length+1);
-
-        locTemp.setLatitude(latitude);
-        locTemp.setLongitude(longitude);
-
-        return locTemp;
-    }
-
-    public void getOthersLocation(Location[] loc){
-        //TODO: get location from server
-        membersLocation = new Location[loc.length];
-        for(int i = 0; i<loc.length; i++)
-            membersLocation[i] = loc[i];
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2000, this);
+        currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        lm.removeUpdates(this);
     }
 
     @Override

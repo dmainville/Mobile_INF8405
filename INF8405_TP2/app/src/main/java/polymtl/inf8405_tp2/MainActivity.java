@@ -1,13 +1,19 @@
 package polymtl.inf8405_tp2;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -56,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> ordrePreferences;
     ArrayList<String> values = new  ArrayList<>(Arrays.asList("Restaurant", "Café", "Parc", "Pizzéria", "Cafétéria", "École", "Maison"));
     ArrayAdapter<String> adapter;
+    LocationService locations;
     private UserProfile currentProfile;
 
     @Override
@@ -140,6 +147,32 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
 
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == 0) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
+                    t.show();
+                    return;
+                }
+                LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2000, locations);
+                locations.currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                lm.removeUpdates(locations);
+
+                Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
+                t.show();
+            }
+            else {
+                Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
+                t.show();
+            }
         }
     }
 
@@ -328,6 +361,14 @@ public class MainActivity extends AppCompatActivity {
             returnValue = false;
         }
 
+        locations = new LocationService(this);
+        if(locations.currentLocation == null)
+        {
+            Toast t = Toast.makeText(this,"Vous devez activer la geolocalisation!",Toast.LENGTH_SHORT);
+            t.show();
+            returnValue = false;
+        }
+
         return returnValue;
     }
 
@@ -337,6 +378,8 @@ public class MainActivity extends AppCompatActivity {
         currentProfile.email = mEmail.getText().toString();
         currentProfile.preferences = CreateTextPreferences();
         currentProfile.organizer = mOrganisateur.isChecked();
+        currentProfile.latitude = locations.currentLocation.getLatitude();
+        currentProfile.longitude = locations.currentLocation.getLongitude();
 
         SaveCurrentProfile();
         TestCalendar();

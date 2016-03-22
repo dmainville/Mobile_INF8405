@@ -25,6 +25,8 @@ public class UserProfile implements Serializable{
     String email;
     String preferences; //Comma separated format
     Boolean organizer;
+    Double longitude, meetingLongitude;
+    Double latitude, meetingLatitude;
     private String profilePictureBase64;
     //TODO add Some var type de save the current location
 
@@ -91,7 +93,9 @@ public class UserProfile implements Serializable{
         email = props.getProperty("email");
         organizer = Boolean.valueOf(props.getProperty("organizer"));
         preferences = props.getProperty("preferences");
-        profilePictureBase64 = props.getProperty("profilePicture");
+        longitude = Double.parseDouble(props.getProperty("longitude"));
+        latitude = Double.parseDouble(props.getProperty("latitude"));
+        //profilePictureBase64 = props.getProperty("profilePicture");
 
         return true;
     }
@@ -103,7 +107,9 @@ public class UserProfile implements Serializable{
         result.setProperty("email", email);
         result.setProperty("organizer", String.valueOf(organizer));
         result.setProperty("preferences", preferences);
-        result.setProperty("profilePicture", profilePictureBase64);
+        result.setProperty("longitude", String.valueOf(longitude));
+        result.setProperty("latitude", String.valueOf(latitude));
+        //result.setProperty("profilePicture", profilePictureBase64);
 
         return result;
     }
@@ -139,8 +145,7 @@ public class UserProfile implements Serializable{
             return null;
     }
 
-    public void setProfilePicture(Bitmap bitmap)
-    {
+    public void setProfilePicture(Bitmap bitmap) {
         profilePictureBase64 = bitmapToString(bitmap);
     }
 

@@ -16,14 +16,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private LocationService locService;
+    private UserProfile mCurrentProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_map);
-
-        locService = new LocationService();
+        mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -38,9 +37,11 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
 
-        Location loc = locService.triangulateLocation();
+        Location loc = new Location("Meeting Area");
+        loc.setLongitude(mCurrentProfile.meetingLongitude);
+        loc.setLatitude(mCurrentProfile.meetingLatitude);
         // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(loc.getLatitude(), loc.getLatitude());
+        LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
         mMap.addMarker(new MarkerOptions().position(latlng).title(loc.getProvider()));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
 
