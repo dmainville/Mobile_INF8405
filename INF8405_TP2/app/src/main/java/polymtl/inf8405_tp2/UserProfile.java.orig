@@ -27,8 +27,12 @@ public class UserProfile implements Serializable{
     String email;
     String preferences; //Comma separated format
     Boolean organizer;
-    private String profilePictureBase64 = "";
+<<<<<<< HEAD
+    private String profilePictureBase64;
     List<CalendarEvent> events;
+=======
+    private String profilePictureBase64 = "";
+>>>>>>> f97b009c072a1a482c8db87374edf81e362d82d9
     //TODO add Some var type de save the current location
 
     public UserProfile()
