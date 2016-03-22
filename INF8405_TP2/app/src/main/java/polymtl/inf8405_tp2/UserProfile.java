@@ -107,7 +107,7 @@ public class UserProfile implements Serializable{
         result.setProperty("email", email);
         result.setProperty("organizer", String.valueOf(organizer));
         result.setProperty("preferences", preferences);
-        //result.setProperty("profilePicture", profilePictureBase64);
+        result.setProperty("profilePicture", profilePictureBase64);
 
         return result;
     }
