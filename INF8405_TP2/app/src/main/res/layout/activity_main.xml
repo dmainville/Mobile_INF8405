@@ -32,7 +32,6 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_group_name"
                     android:imeActionId="@+id/login"
-                    android:imeActionLabel="@string/action_sign_in"
                     android:maxLines="1"
                     android:singleLine="true" />
 
