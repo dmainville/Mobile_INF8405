@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.text.format.Time;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     final private int REQUEST_CODE_PICTURE = 1;
@@ -290,6 +292,28 @@ public class MainActivity extends AppCompatActivity {
         currentProfile.organizer = mOrganisateur.isChecked();
 
         SaveCurrentProfile();
+        TestCalendar();
+
+
+    }
+
+    public void TestCalendar()
+    {
+        System.out.println("Testing Calendar");
+
+        Time dayStart = new Time();
+        dayStart.setToNow();
+        dayStart.hour=0;
+        dayStart.minute=0;
+        dayStart.second = 0;
+
+        Time dayEnd = new Time();
+        dayEnd.set(dayStart);
+        dayEnd.hour=dayStart.hour+23;
+        dayEnd.minute=dayStart.minute+59;
+        dayEnd.second=dayStart.second+59;
+
+        List<CalendarEvent> events = CalendarEventReader.GetCurrentDeviceCalendarEvents(this.getApplicationContext(),dayStart.toMillis(false),dayEnd.toMillis(false));
     }
 
     public String CreateTextPreferences(){
