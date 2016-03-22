@@ -51,7 +51,6 @@
                     android:layout_height="100dp"
                     android:layout_below="@id/email"
                     android:contentDescription="@string/prompt_picture"
-                    android:src="@drawable/no_profile_image"
                     android:clickable="true" />
 
                 <CheckBox
