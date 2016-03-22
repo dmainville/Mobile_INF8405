@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     final private int REQUEST_CODE_IMAGE = 2;
     final private int REQUEST_CODE_WAITING_ROOM_ACTIVITY = 3;
 
+    final private int MAX_DAYS_BEFORE_EVENT = 3;
+
     // UI references.
     private ViewSwitcher mViewSwitcher;
     private EditText mGroupName;
@@ -185,6 +187,8 @@ public class MainActivity extends AppCompatActivity {
     {
         if(currentProfile == null)
             return;
+
+        currentProfile.loadUserEvents(MAX_DAYS_BEFORE_EVENT, this.getApplicationContext());
 
         if(!currentProfile.SaveProfile(this.getApplicationContext()))
         {
@@ -339,9 +343,6 @@ public class MainActivity extends AppCompatActivity {
         currentProfile.organizer = mOrganisateur.isChecked();
 
         SaveCurrentProfile();
-        TestCalendar();
-
-
     }
 
     public void TestCalendar()

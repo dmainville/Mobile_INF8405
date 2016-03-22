@@ -2,6 +2,7 @@ package polymtl.inf8405_tp2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.format.Time;
 import android.util.Base64;
 
 import com.firebase.client.Firebase;
@@ -11,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -26,6 +28,7 @@ public class UserProfile implements Serializable{
     String preferences; //Comma separated format
     Boolean organizer;
     private String profilePictureBase64;
+    List<CalendarEvent> events;
     //TODO add Some var type de save the current location
 
     public UserProfile()
@@ -137,6 +140,26 @@ public class UserProfile implements Serializable{
         }
         else
             return null;
+    }
+
+    //Récupère les évènements de l'utilisateur pour le nombre de jours passé en paramère à partir de la journée courrante.
+    public void loadUserEvents(int dayCount, Context context)
+    {
+        Time dayStart = new Time();
+        dayStart.setToNow();
+        dayStart.hour=0;
+        dayStart.minute=0;
+        dayStart.second = 0;
+
+        Time dayEnd = new Time();
+        dayEnd.set(dayStart);
+        dayEnd.yearDay=dayStart.yearDay+dayCount;
+        dayEnd.hour=dayStart.hour+23;
+        dayEnd.minute=dayStart.minute+59;
+        dayEnd.second=dayStart.second+59;
+
+        List<CalendarEvent> events = CalendarEventReader.GetCurrentDeviceCalendarEvents(context,dayStart.toMillis(false),dayEnd.toMillis(false));
+        this.events = events;
     }
 
     public void setProfilePicture(Bitmap bitmap)

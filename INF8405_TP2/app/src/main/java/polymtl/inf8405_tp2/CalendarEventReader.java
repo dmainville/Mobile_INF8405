@@ -69,9 +69,9 @@ public class CalendarEventReader {
             System.out.println("CALENDAR ERROR : "+e.toString());
         }
 
-
-
-
         return events;
     }
+
+
+
 }
