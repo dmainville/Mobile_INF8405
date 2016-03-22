@@ -1,5 +1,7 @@
 package polymtl.inf8405_tp2;
 
+import android.location.Location;
+import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,11 +16,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private UserProfile mCurrentProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_map);
+        mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -33,10 +37,13 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
 
+        Location loc = new Location("Meeting Area");
+        loc.setLongitude(mCurrentProfile.meetingLongitude);
+        loc.setLatitude(mCurrentProfile.meetingLatitude);
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(latlng).title(loc.getProvider()));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
 
     }
 }
