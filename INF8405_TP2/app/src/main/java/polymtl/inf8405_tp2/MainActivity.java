@@ -26,6 +26,7 @@ import android.widget.ViewSwitcher;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,25 +90,49 @@ public class MainActivity extends AppCompatActivity {
             switch(requestCode){
                 //TODO: Je ne peux pas le tester avec un emulator (pas de camera ni d'images)
                 case REQUEST_CODE_IMAGE:
-                    // Transformer l'image retournée en un bitmap
+                case REQUEST_CODE_PICTURE:
+                    // Transformer l'image retournée en un bitmap, en la downsizant au préalable
                     Uri selectedImageURL = data.getData();
                     InputStream imageStream = null;
                     try {
-                        imageStream = getContentResolver().openInputStream(selectedImageURL);
+                        imageStream = getContentResolver().openInputStream(selectedImageURL); //throws FileNotFoundException
+
+                        // Chercher la taille de l'image sans la décoder
+                        BitmapFactory.Options bfOptions = new BitmapFactory.Options();
+                        bfOptions.inJustDecodeBounds = true;
+                        BitmapFactory.decodeStream(imageStream, null, bfOptions);
+
+                        //réduire la taille
+                        final int TARGET_SIZE = 400;
+
+                        // On cherche l'échelle de réduction pour que le width et le heigh soient plus petit que TARGET_SIZE
+                        int scale = 1;
+                        System.out.println(bfOptions.outHeight + " =========== " + bfOptions.outWidth);
+                        for ( ; bfOptions.outWidth / scale > TARGET_SIZE || bfOptions.outWidth / scale > TARGET_SIZE; scale*=2);
+
+                        // On ouvre l'image
+                        BitmapFactory.Options bfOptions2 = new BitmapFactory.Options();
+                        bfOptions2.inSampleSize = scale;
+                        Bitmap imageBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImageURL), null, bfOptions2);
+
+                        // Associer ce bitmap au user
+                        currentProfile.setProfilePicture(imageBitmap);
+
+                        // Modifier l'image de profil affichée
+                        mPhoto.setImageBitmap(imageBitmap);
+
+                        // Fermer le stream
+                        imageStream.close(); //trhows IOException
                     }
                     catch (FileNotFoundException e)
                     {
                         System.err.println("Image File not found");
                         Toast.makeText(this, "Unable to load image",Toast.LENGTH_SHORT).show();
                     }
-                    Bitmap imageBitmap = BitmapFactory.decodeStream(imageStream);
-
-                    // TODO: downsample image
-
-                    // Modifier l'image de profil affichée
-                    mPhoto.setImageBitmap(imageBitmap);
-                    break;
-                case REQUEST_CODE_PICTURE:
+                    catch (IOException e)
+                    {
+                        e.printStackTrace(); //close stream failed
+                    }
                     break;
                 case REQUEST_CODE_WAITING_ROOM_ACTIVITY:
                     break;
@@ -138,14 +163,14 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
 
             AjustFieldsToProfile();
-        }
-        else
+        } else
         {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 2", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
 
+    /// Met les champs à jour avec les valeurs de currentUser
     public void AjustFieldsToProfile()
     {
         mGroupName.setText(currentProfile.groupName);
@@ -153,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
         mOrganisateur.setChecked(currentProfile.organizer);
         LoadTextPreferences();
         mLoginPreferences.setText(CreateTextPreferences());
+        mPhoto.setImageBitmap(currentProfile.getProfilePicture());
     }
 
     public void SaveCurrentProfile()
@@ -160,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
         if(currentProfile == null)
             return;
 
-        //TODO: save profile picture locally and remotely
         if(!currentProfile.SaveProfile(this.getApplicationContext()))
         {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Failed saving user profile locally!", Toast.LENGTH_SHORT);

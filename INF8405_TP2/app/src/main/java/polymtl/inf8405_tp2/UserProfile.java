@@ -1,8 +1,12 @@
 package polymtl.inf8405_tp2;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 
 import com.firebase.client.Firebase;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +25,7 @@ public class UserProfile implements Serializable{
     String email;
     String preferences; //Comma separated format
     Boolean organizer;
+    private String profilePictureBase64;
     //TODO add Some var type de save the current location
 
     public UserProfile()
@@ -42,11 +47,10 @@ public class UserProfile implements Serializable{
 
         try {
             outputStream = applicationContext.openFileOutput(filename, Context.MODE_PRIVATE);
-            //outputStream.write(string.getBytes());
             props.store(outputStream, null);
             outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace(); // if a key or value is not a string
             return false;
         }
 
@@ -87,6 +91,7 @@ public class UserProfile implements Serializable{
         email = props.getProperty("email");
         organizer = Boolean.valueOf(props.getProperty("organizer"));
         preferences = props.getProperty("preferences");
+        profilePictureBase64 = props.getProperty("profilePicture");
 
         return true;
     }
@@ -98,7 +103,49 @@ public class UserProfile implements Serializable{
         result.setProperty("email", email);
         result.setProperty("organizer", String.valueOf(organizer));
         result.setProperty("preferences", preferences);
+        result.setProperty("profilePicture", profilePictureBase64);
 
         return result;
+    }
+
+
+    /// Compresser le bitmap en PNG et retourner un string base64
+    public final static String bitmapToString(Bitmap in){
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        in.compress(Bitmap.CompressFormat.PNG, 100, bytes); // lossless avec png
+        String resultString = Base64.encodeToString(bytes.toByteArray(), Base64.DEFAULT);
+        try
+        {
+            bytes.close();
+        }
+        catch (IOException e)
+        {
+            // close a échoué
+            e.printStackTrace();
+        }
+        return resultString;
+    }
+
+
+    // Décoder le string base64 et décompresser le png
+    // Returns: null si le string ne peut pas être décodé en bmp
+    private Bitmap stringToBitmap(String in){
+        if (in != null && ! in.isEmpty())
+        {
+            byte[] bytes = Base64.decode(in, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        }
+        else
+            return null;
+    }
+
+    public void setProfilePicture(Bitmap bitmap)
+    {
+        profilePictureBase64 = bitmapToString(bitmap);
+    }
+
+    public Bitmap getProfilePicture()
+    {
+        return stringToBitmap(profilePictureBase64);
     }
 }
