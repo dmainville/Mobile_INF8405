@@ -116,10 +116,10 @@ public class UserProfile implements Serializable{
         if (longitude != null) result.setProperty("longitude", String.valueOf(longitude));
         if (latitude != null) result.setProperty("latitude", String.valueOf(latitude));
         if (profilePictureBase64 != null) result.setProperty("profilePicture", profilePictureBase64);
+        if(events!=null) result.setProperty("events", events.toString());
 
         return result;
     }
-
 
     /// Compresser le bitmap en PNG et retourner un string base64
     public final static String bitmapToString(Bitmap in){

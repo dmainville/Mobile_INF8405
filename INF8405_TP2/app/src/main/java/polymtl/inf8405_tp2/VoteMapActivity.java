@@ -6,6 +6,10 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -13,10 +17,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
+    private ArrayList<String> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +36,41 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        users = GetGroupUsers();
+
     }
+
+    public ArrayList<String> GetGroupUsers()
+    {
+        users = new ArrayList<String>();
+
+        Firebase mFirebaseGroupRef;
+
+        Firebase.setAndroidContext(this);
+
+        //Récupéré les users du groupe
+        mFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("readyGroups")
+                .child(mCurrentProfile.groupName)
+                .child("members");
+
+        mFirebaseGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    System.out.println("CHILD!!"+child.getKey());
+                    users.add(child.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {}
+        });
+
+        return users;
+
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
