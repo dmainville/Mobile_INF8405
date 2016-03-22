@@ -43,23 +43,34 @@ public class CalendarEventReader {
 
         System.out.println("READING CALENDAR 2");
 
-        Cursor cursor = CalendarContract.Instances.query(context.getContentResolver(), FIELDS, startTime, endTime);
-        while (cursor.moveToNext())
+        try
         {
+            Cursor cursor = CalendarContract.Instances.query(context.getContentResolver(), FIELDS, startTime, endTime);
             System.out.println("READING CALENDAR 3");
+            while (cursor.moveToNext())
+            {
+                System.out.println("READING CALENDAR 4");
 
-            if(Integer.parseInt(cursor.getString(4)) != CalendarContract.Instances.AVAILABILITY_BUSY)
-                continue;
+                if(Integer.parseInt(cursor.getString(4)) != CalendarContract.Instances.AVAILABILITY_BUSY)
+                    continue;
 
-            Long eventStart = (Long.parseLong(cursor.getString(2)));
-            Long eventEnd = (Long.parseLong(cursor.getString(3)));
-            String eventName = cursor.getString(1);
+                Long eventStart = (Long.parseLong(cursor.getString(2)));
+                Long eventEnd = (Long.parseLong(cursor.getString(3)));
+                String eventName = cursor.getString(1);
 
-            CalendarEvent event = new CalendarEvent(eventStart,eventEnd,eventName);
-            events.add(event);
+                CalendarEvent event = new CalendarEvent(eventStart,eventEnd,eventName);
+                events.add(event);
 
-            System.out.println("EVENT : " + eventName);
+                System.out.println("EVENT : " + eventName);
+            }
         }
+        catch(Exception e)
+        {
+            System.out.println("CALENDAR ERROR : "+e.toString());
+        }
+
+
+
 
         return events;
     }
