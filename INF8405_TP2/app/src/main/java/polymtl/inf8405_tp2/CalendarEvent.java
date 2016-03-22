@@ -2,7 +2,9 @@ package polymtl.inf8405_tp2;
 
 //Permet de garder en mémoire les disponibilités des utilisateurs
 
-public class CalendarEvent {
+import java.io.Serializable;
+
+public class CalendarEvent implements Serializable {
 
     Long eventStart;
     Long eventEnd;
