@@ -14,6 +14,12 @@ public class CalendarEvent implements Serializable {
     {
         this.eventStart = eventStart;
         this.eventEnd = eventEnd;
+        this.eventName = eventName;
+    }
+
+    public String toString()
+    {
+        return eventStart.toString()+"-"+eventEnd+"-"+eventName;
     }
 
 }

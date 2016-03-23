@@ -23,7 +23,10 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
-    private ArrayList<String> users;
+    Firebase mFirebaseRef;
+    Firebase mFirebaseGroupRef;
+    ArrayList<String> users;
+    ArrayList<CalendarEvent> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +39,51 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        users = GetGroupUsers();
+        GetGroupUsers();
 
     }
 
-    public ArrayList<String> GetGroupUsers()
+    public void GetUsersEvents(ArrayList<String> users)
+    {
+        events = new ArrayList<CalendarEvent>();
+        Firebase.setAndroidContext(this);
+
+        System.out.println("GET USERS EVENT");
+
+        for (String user : users)
+        {
+            System.out.println("LOOKING FOR USER :"+user);
+
+            //Récupéré les event du user
+            mFirebaseRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                    .child("UserProfiles")
+                    .child(user);
+
+            mFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        if(child.getKey()!="events")
+                            continue;
+
+                        System.out.println("EVENTS : "+child.getValue());
+
+                    }
+
+
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {}
+            });
+        }
+    }
+
+
+    public void GetGroupUsers()
     {
         users = new ArrayList<String>();
-
-        Firebase mFirebaseGroupRef;
 
         Firebase.setAndroidContext(this);
 
@@ -61,14 +100,13 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                     System.out.println("CHILD!!"+child.getKey());
                     users.add(child.getKey());
                 }
+
+                GetUsersEvents(users);
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {}
         });
-
-        return users;
-
     }
 
 

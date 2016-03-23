@@ -12,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -116,7 +118,18 @@ public class UserProfile implements Serializable{
         if (longitude != null) result.setProperty("longitude", String.valueOf(longitude));
         if (latitude != null) result.setProperty("latitude", String.valueOf(latitude));
         if (profilePictureBase64 != null) result.setProperty("profilePicture", profilePictureBase64);
-        if(events!=null) result.setProperty("events", events.toString());
+        if(events!=null)
+        {
+            /*String strEvents = "";
+            for(CalendarEvent event : events)
+            {
+                if(strEvents!="")
+                    strEvents+=";";
+                strEvents+= events.toString();
+            }
+            result.setProperty("events", strEvents);*/
+            result.setProperty("events", events.toString());
+        }
 
         return result;
     }
@@ -154,20 +167,14 @@ public class UserProfile implements Serializable{
     //Récupère les évènements de l'utilisateur pour le nombre de jours passé en paramère à partir de la journée courrante.
     public void loadUserEvents(int dayCount, Context context)
     {
-        Time dayStart = new Time();
-        dayStart.setToNow();
-        dayStart.hour=0;
-        dayStart.minute=0;
-        dayStart.second = 0;
+        Calendar startDate = Calendar.getInstance();
+        startDate.setTime(new Date());
 
-        Time dayEnd = new Time();
-        dayEnd.set(dayStart);
-        dayEnd.yearDay=dayStart.yearDay+dayCount;
-        dayEnd.hour=dayStart.hour+23;
-        dayEnd.minute=dayStart.minute+59;
-        dayEnd.second=dayStart.second+59;
+        Calendar endDate = Calendar.getInstance();
+        endDate.setTime(new Date());
+        endDate.add(Calendar.DATE,dayCount);
 
-        List<CalendarEvent> events = CalendarEventReader.GetCurrentDeviceCalendarEvents(context,dayStart.toMillis(false),dayEnd.toMillis(false));
+        List<CalendarEvent> events = CalendarEventReader.GetCurrentDeviceCalendarEvents(context,startDate.getTimeInMillis(),endDate.getTimeInMillis());
         this.events = events;
     }
 
