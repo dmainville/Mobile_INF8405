@@ -44,7 +44,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         mBtnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startVoteDateActivity();
+                startVoteDateActivity();
             }
         });
 

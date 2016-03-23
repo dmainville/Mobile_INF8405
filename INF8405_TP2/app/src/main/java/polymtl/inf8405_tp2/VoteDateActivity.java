@@ -4,6 +4,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
@@ -20,35 +22,125 @@ public class VoteDateActivity extends AppCompatActivity {
 
     Firebase mFirebaseRef;
     Firebase mFirebaseGroupRef;
+    Firebase mFirebaseVoteRef;
+
     ArrayList<String> users;
     ArrayList<CalendarEvent> events;
     private UserProfile mCurrentProfile;
     Calendar[] availabilities;
-    boolean readyToVote = false;
 
     private Button mBtnVote;
     private TextView mLblTime1;
     private TextView mLblTime2;
     private TextView mLblTime3;
+    private TextView mLblCount1;
+    private TextView mLblCount2;
+    private TextView mLblCount3;
+
+    private RadioGroup mRadioGroup;
+
+    private int[] voteCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_date);
 
+        mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+
+        Firebase.setAndroidContext(this);
+        mFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("readyGroups")
+                .child(mCurrentProfile.groupName)
+                .child("members");
+
+        mFirebaseVoteRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("readyGroups")
+                .child(mCurrentProfile.groupName)
+                .child("Votes");
+
+        mRadioGroup = (RadioGroup)findViewById(R.id.rbGroupDate);
         mLblTime1 = (TextView) findViewById(R.id.lblTime1);
         mLblTime2 = (TextView) findViewById(R.id.lblTime2);
         mLblTime3 = (TextView) findViewById(R.id.lblTime3);
+
+        mLblCount1 = (TextView) findViewById(R.id.lblVoteCount1);
+        mLblCount2 = (TextView) findViewById(R.id.lblVoteCount2);
+        mLblCount3 = (TextView) findViewById(R.id.lblVoteCount3);
+
         mBtnVote = (Button) findViewById(R.id.btnVote);
         mBtnVote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Do something
+
+                int radioButtonID = mRadioGroup.getCheckedRadioButtonId();
+                View radioButton = mRadioGroup.findViewById(radioButtonID);
+                int idx = mRadioGroup.indexOfChild(radioButton);
+                //System.out.println("INDEX : " + idx);
+
+                //Les indexes des radio button sont 1, 4 et 7. -1 Veux dire que rien  n'est sélectionné
+
+                int idVote = 0;
+                switch (idx) {
+                    case 1:
+                        idVote = 0;
+                        break;
+
+                    case 4:
+                        idVote = 1;
+                        break;
+
+                    case 7:
+                        idVote = 2;
+                        break;
+                }
+
+                if (idVote != 0) {
+                    System.out.println("VOTE COUNT : " + idVote + " - " + (voteCount[idVote] + 1));
+                    mFirebaseVoteRef.child("votes" + (idVote+1)).setValue((voteCount[idVote] + 1));
+
+                    mBtnVote.setEnabled(false);
+                }
+
             }
         });
 
-        mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
         GetGroupUsers();
+        LoadVotes();
+
+        mFirebaseVoteRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                //Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
+                if (snapshot.hasChild("votes1")) {
+                    voteCount[0] = Integer.parseInt(snapshot.child("votes1").getValue().toString());
+                    mLblCount1.setText("Votes : "+ voteCount[0]);
+
+                }
+
+                if (snapshot.hasChild("votes2")) {
+                    voteCount[1] = Integer.parseInt(snapshot.child("votes2").getValue().toString());
+                    mLblCount2.setText("Votes : "+ voteCount[1]);
+                }
+
+                if (snapshot.hasChild("votes3")) {
+                    voteCount[2] = Integer.parseInt(snapshot.child("votes3").getValue().toString());
+                    mLblCount3.setText("Votes : "+ voteCount[2]);
+                }
+
+                System.out.println("DATA CHANGED!");
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+    }
+
+    public void LoadVotes()
+    {
+        voteCount = new int[3];
     }
 
     public void ChooseBestAvailabilities()
@@ -162,14 +254,11 @@ public class VoteDateActivity extends AppCompatActivity {
         mLblTime2.setText(availabilities[1].getTime().toString());
         mLblTime3.setText(availabilities[2].getTime().toString());
 
-        readyToVote = true;
     }
 
     public void GetUsersEvents()
     {
         events = new ArrayList<CalendarEvent>();
-        Firebase.setAndroidContext(this);
-
         System.out.println("GET USERS EVENT");
 
         //Récupéré les event des users
@@ -231,11 +320,6 @@ public class VoteDateActivity extends AppCompatActivity {
         Firebase.setAndroidContext(this);
 
         //Récupéré les users du groupe
-        mFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
-                .child("readyGroups")
-                .child(mCurrentProfile.groupName)
-                .child("members");
-
         mFirebaseGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {

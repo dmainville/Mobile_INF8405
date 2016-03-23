@@ -110,6 +110,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 // Marquer, dans la BD, que le groupe est prêt pour passer au vote
                 // Trigger l'événement chez tous les clients.
                 myFirebaseGroupRef.child("readyState").setValue(true);
+                myFirebaseGroupRef.child("Votes").child("votes1").setValue(0);
+                myFirebaseGroupRef.child("Votes").child("votes2").setValue(0);
+                myFirebaseGroupRef.child("Votes").child("votes3").setValue(0);
             }
         });
     }
