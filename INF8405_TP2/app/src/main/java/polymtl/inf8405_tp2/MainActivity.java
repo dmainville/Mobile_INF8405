@@ -62,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Acutal application data
     private ArrayList<String> ordrePreferences;
-    ArrayList<String> values = new  ArrayList<>(Arrays.asList("Restaurant", "Café", "Parc", "Pizzéria", "Cafétéria", "École", "Maison"));
-    ArrayAdapter<String> adapter;
-    LocationService locations;
+    private ArrayList<String> values = new  ArrayList<>(Arrays.asList("Restaurant", "Café", "Parc", "Pizzéria", "Cafétéria", "École", "Maison"));
+    private ArrayAdapter<String> adapter;
+    private LocationService locations;
     private UserProfile currentProfile;
 
     @Override
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (VerifyInformation())
                 {
-                    locations.UpdateLocation(MainActivity.this);
+                    //locations.UpdateLocation(MainActivity.this);
                     Register();
                     // Procéder à la prochaine activité
                     startWaitingRoomActivity();
@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(locations.currentLocation == null)
         {
-            Toast t = Toast.makeText(this,"Vous devez activer la geolocalisation ou attendre pour avoir plus de précision.",Toast.LENGTH_SHORT);
+            Toast t = Toast.makeText(this,"Vous devez:\n- Activer la geolocalisation\n- Attendre pour avoir plus de précision.\nActivez le Wifi pour améliorer la précision.",Toast.LENGTH_LONG);
             t.show();
             returnValue = false;
         }

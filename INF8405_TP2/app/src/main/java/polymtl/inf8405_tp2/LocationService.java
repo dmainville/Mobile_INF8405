@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 
 public class LocationService implements LocationListener{
-    Location currentLocation = null;
+    Location currentLocation = null; //< doit rester null jusqu'à ce qu'on ait la valeur désirée
     LocationManager mLocationManager;
 
     public LocationService(MainActivity context) {
@@ -22,33 +22,14 @@ public class LocationService implements LocationListener{
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
-        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, this);
-        //To get last known location without onLocationChange
-        currentLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(currentLocation == null)
-            currentLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        //mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, this);
     }
 
-    public void UpdateLocation(MainActivity context){
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
-            //return;
-        }
-        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
-        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, this);
-        //To get last known location without onLocationChange
-        currentLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(currentLocation == null)
-            currentLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-    }
 
     @Override
     public void onLocationChanged(Location location) {
-        // on veut être précis en dedans de 50 m.
-        if (location.getAccuracy() < 50)
+        // on veut être précis en dedans de 100 m.
+        if (location.getAccuracy() < 100)
         {
             currentLocation = location;
             try {

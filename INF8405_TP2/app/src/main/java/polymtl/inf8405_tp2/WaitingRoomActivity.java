@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -93,23 +94,27 @@ public class WaitingRoomActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot snapshot) {
                 //Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
                 if (snapshot.hasChild("readyState")) {
-                    if ((Boolean) snapshot.child("readyState").getValue()) {
-                        // Move to next activity
+                    // On vérifie si notre valeur a été mis à true
+                    if (((Boolean)snapshot.child("members/"+mCurrentProfile.getSanitizedEmail()).getValue()).equals(Boolean.TRUE))
+                    {
                         startVoteMapActivity();
+                    }
+                    else if ((boolean) snapshot.child("readyState").getValue() == true) {
+                        // Move to next activity
+                        Toast.makeText(WaitingRoomActivity.this, "Le vote est déjà commencé pour ce groupe.",Toast.LENGTH_LONG).show();
                     }
                 }
 
                 if (snapshot.hasChild("members")) {
                     mArrayList.clear();
-                    for (DataSnapshot prop : snapshot.child("members").getChildren()) {
+                    /*for (DataSnapshot prop : snapshot.child("members").getChildren()) {
                         if (prop.getKey() == "latitude")
-                            mCurrentProfile.meetingLatitude += (Double) prop.getValue();
+                            mCurrentProfile.meetingLatitude += (Double) prop.getValue();//true+true?
                         if (prop.getKey() == "longitude")
                             mCurrentProfile.meetingLongitude += (Double) prop.getValue();
-                    }
+                    }*/
                     mArrayList.addAll(((Map<String, Object>) snapshot.child("members").getValue()).keySet());
                     mArrayAdapter.notifyDataSetChanged();
-                    System.out.println("NEW MEMBER DETECTED");
                 }
 
                 // Si la BD dit qu'on est admin, afficher le bouton
@@ -129,8 +134,8 @@ public class WaitingRoomActivity extends AppCompatActivity {
             }
         });
 
-        // Ajouter l'usager à la liste des usagers prêts (la value est triviale)
-        myFirebaseGroupRef.child("members").child(mCurrentProfile.getSanitizedEmail()).setValue(true);
+        // Ajouter l'usager à la liste des usagers prêts. La valeur deviendra vraie s'ils sont toujours présents quand l'admin débute la séance.
+        myFirebaseGroupRef.child("members").child(mCurrentProfile.getSanitizedEmail()).setValue(false);
 
 
         // Ajouter un event listener pour le bouton pour l'admin
@@ -140,6 +145,11 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 // Marquer, dans la BD, que le groupe est prêt pour passer au vote
                 // Trigger l'événement chez tous les clients.
                 myFirebaseGroupRef.child("readyState").setValue(true);
+                for (String user : mArrayList)
+                {
+                    myFirebaseGroupRef.child("members").child(user).setValue(true);
+                }
+
                 myFirebaseGroupRef.child("VotesDate").child("votes1").setValue(0);
                 myFirebaseGroupRef.child("VotesDate").child("votes2").setValue(0);
                 myFirebaseGroupRef.child("VotesDate").child("votes3").setValue(0);
