@@ -88,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
         ordrePreferences = new ArrayList<>();
 
-        initializeListener(); //< Ajouter les listeners aux boutons
+        initializeListener(); ///< Ajouter les listeners aux boutons
+        locations = new LocationService(this); ///< commencer à chercher la position
         LoadInitialProfile();
     }
 
@@ -97,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK){
             switch(requestCode){
-                //TODO: Je ne peux pas le tester avec un emulator (pas de camera ni d'images)
                 case REQUEST_CODE_IMAGE:
                 case REQUEST_CODE_PICTURE:
                     // Transformer l'image retournée en un bitmap, en la downsizant au préalable
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
+    /*
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if (requestCode == 0) {
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
+*/
     public void LoadInitialProfile()
     {
         currentProfile = new UserProfile();
@@ -188,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Could not find a profile to load!", Toast.LENGTH_SHORT);
             toast.show();
-            e.printStackTrace();
+
+            AjustFieldsToProfile();
             return;
         }
 
@@ -202,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
         {
             Toast toast = Toast.makeText(this.getApplicationContext(), "Failed loading previous profile! ErrCode : 2", Toast.LENGTH_SHORT);
             toast.show();
+            AjustFieldsToProfile();
         }
     }
 
@@ -365,10 +367,9 @@ public class MainActivity extends AppCompatActivity {
             returnValue = false;
         }
 
-        locations = new LocationService(this);
         if(locations.currentLocation == null)
         {
-            Toast t = Toast.makeText(this,"Vous devez activer la geolocalisation!",Toast.LENGTH_SHORT);
+            Toast t = Toast.makeText(this,"Vous devez activer la geolocalisation ou attendre pour avoir plus de précision.",Toast.LENGTH_SHORT);
             t.show();
             returnValue = false;
         }
@@ -419,23 +420,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void LoadTextPreferences()
     {
-        String[] prefs = currentProfile.preferences.split(",");
-
-        for(int i=0; i<prefs.length; i++)
+        if (currentProfile.preferences != null && currentProfile.preferences != "")
         {
-            String currentPref = prefs[i].split(":")[1].trim();
-            ordrePreferences.add(currentPref);
+            String[] prefs = currentProfile.preferences.split(",");
 
-            int index = FindPreferenceItem(currentPref);
-            if(index == -1)
-            {
-                values.add(currentPref);
-                adapter.notifyDataSetChanged();
-                mListViewPreferences.setItemChecked(values.size()-1,true);
-            }
-            else
-            {
-                mListViewPreferences.setItemChecked(index,true);
+            for (int i = 0; i < prefs.length; i++) {
+                String currentPref = prefs[i].split(":")[1].trim();
+                ordrePreferences.add(currentPref);
+
+                int index = FindPreferenceItem(currentPref);
+                if (index == -1) {
+                    values.add(currentPref);
+                    adapter.notifyDataSetChanged();
+                    mListViewPreferences.setItemChecked(values.size() - 1, true);
+                } else {
+                    mListViewPreferences.setItemChecked(index, true);
+                }
             }
         }
     }

@@ -14,22 +14,36 @@ import android.support.v4.app.ActivityCompat;
  */
 public class LocationService implements LocationListener{
     Location currentLocation = null;
+    LocationManager mLocationManager;
 
     public LocationService(MainActivity context) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
-            return;
+            //return;
         }
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2000, this);
-        currentLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        lm.removeUpdates(this);
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
+        mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, this);
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        currentLocation = location;
+        // on veut être précis en dedans de 50 m.
+        if (location.getAccuracy() < 50)
+        {
+            currentLocation = location;
+            try {
+                mLocationManager.removeUpdates(this);
+            }
+            catch (SecurityException e)
+            {
+                // si l'usager a déjà révoqué la permission, on n'a pas besoin de le faire.
+            }
+
+            // TODO: afficher utilisation de la batterie?
+        }
     }
 
     @Override
