@@ -29,8 +29,8 @@ public class UserProfile implements Serializable{
     String email;
     String preferences; //Comma separated format
     Boolean organizer;
-    Double longitude, meetingLongitude;
-    Double latitude, meetingLatitude;
+    Double longitude;
+    Double latitude;
     private String profilePictureBase64 = "";
     List<CalendarEvent> events;
     //TODO add Some var type de save the current location

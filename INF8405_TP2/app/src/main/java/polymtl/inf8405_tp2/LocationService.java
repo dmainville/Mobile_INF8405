@@ -26,6 +26,10 @@ public class LocationService implements LocationListener{
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, this);
         mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 1000, 0, this);
+        //To get last known location without onLocationChange
+        currentLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if(currentLocation == null)
+            currentLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
     }
 
     @Override

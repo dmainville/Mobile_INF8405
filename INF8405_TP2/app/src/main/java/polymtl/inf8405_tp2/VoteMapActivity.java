@@ -1,9 +1,7 @@
 package polymtl.inf8405_tp2;
 
 import android.location.Location;
-import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.firebase.client.DataSnapshot;
@@ -15,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -27,6 +26,9 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
     Firebase mFirebaseGroupRef;
     ArrayList<String> users;
     ArrayList<CalendarEvent> events;
+    Double mLongitude;
+    Double mLatitude;
+    Marker meetingMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,8 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         setContentView(R.layout.activity_vote_map);
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
 
+        mLatitude = 0.0;
+        mLongitude = 0.0;
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -73,15 +77,19 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
                     for (DataSnapshot properties : child.getChildren())
                     {
-                        if(properties.getKey() != "events")
-                            continue;
-
-                        System.out.println("EVENTS : " + properties.getValue());
-                        String strEvents[] = properties.getValue().toString().split(",");
-                        for(String strEvent : strEvents)
-                        {
-                            events.add(new CalendarEvent(strEvent));
+                        if(properties.getKey() == "events"){
+                            System.out.println("EVENTS : " + properties.getValue());
+                            String strEvents[] = properties.getValue().toString().split(",");
+                            for(String strEvent : strEvents)
+                            {
+                                events.add(new CalendarEvent(strEvent));
+                            }
                         }
+                        if(properties.getKey() == "latitude")
+                            mLatitude += (Double)properties.getValue();
+                        if(properties.getKey() == "longitude")
+                            mLongitude += (Double)properties.getValue();
+
                     }
                 }
 
@@ -121,6 +129,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 }
 
                 GetUsersEvents();
+                UpdateMap();
             }
 
             @Override
@@ -135,13 +144,20 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
 
-        Location loc = new Location("Meeting Area");
-        loc.setLongitude(mCurrentProfile.meetingLongitude);
-        loc.setLatitude(mCurrentProfile.meetingLatitude);
-        // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(latlng).title(loc.getProvider()));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+        // Add a marker and move the camera
+        LatLng latlng = new LatLng(mLatitude / users.size(), mLongitude/users.size());
+        meetingMarker = mMap.addMarker(new MarkerOptions()
+            .position(latlng)
+            .title("Meeting Area"));
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(meetingMarker.getPosition()));
+    }
+
+    public void UpdateMap(){
+        meetingMarker.remove();
+        LatLng latlng = new LatLng(mLatitude / users.size(), mLongitude/users.size());
+        meetingMarker = mMap.addMarker(new MarkerOptions()
+        .position(latlng)
+        .title("Meeting Area"));
     }
 }

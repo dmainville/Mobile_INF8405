@@ -113,10 +113,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
     private void startVoteMapActivity()
     {
-        mCurrentProfile.meetingLatitude = mCurrentProfile.latitude;
-        mCurrentProfile.meetingLongitude = mCurrentProfile.longitude;
-        for(int i = 0; i<mArrayList.size(); i++)
-        {        }                      //TODO: Calculate meeting area!
         Intent intent = new Intent(this, VoteMapActivity.class);
         intent.putExtra("profile", mCurrentProfile);
         // TODO: est-ce qu'on pass la liste comme ça ou on le re-fetch dans la BD?
