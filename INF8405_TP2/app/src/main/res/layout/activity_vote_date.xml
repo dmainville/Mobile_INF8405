@@ -8,5 +8,78 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="polymtl.inf8405_tp2.VoteDateActivity">
+    <ScrollView
+        android:id="@+id/login_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading Date and Time"
+            android:id="@+id/lblTime1"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rbChoice1"
+            android:checked="false"
+            android:layout_marginStart="66dp"
+            android:layout_alignTop="@+id/lblTime1"
+            android:layout_toEndOf="@+id/lblTime1"
+            android:layout_gravity="right" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading Date and Time"
+            android:id="@+id/lblTime2"
+            android:layout_marginTop="54dp"
+            android:layout_below="@+id/rbChoice1"
+            android:layout_alignParentStart="true" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rbChoice2"
+            android:checked="false"
+            android:layout_alignTop="@+id/lblTime2"
+            android:layout_alignStart="@+id/rbChoice1"
+            android:layout_gravity="right" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading Date and Time"
+            android:id="@+id/lblTime3"
+            android:layout_below="@+id/rbChoice2"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="69dp" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rbChoice3"
+            android:checked="false"
+            android:layout_alignTop="@+id/lblTime3"
+            android:layout_alignStart="@+id/rbChoice2"
+            android:layout_gravity="right" />
+    </RadioGroup>
+    </ScrollView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Voter"
+        android:id="@+id/btnVote"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
