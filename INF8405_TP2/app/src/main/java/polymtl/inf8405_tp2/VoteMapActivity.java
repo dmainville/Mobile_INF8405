@@ -33,7 +33,8 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
     private UserProfile mCurrentProfile;
     Marker meetingMarker;
     Button mBtnSkip;
-
+    private int memberCount = Integer.MAX_VALUE; //Utilisé pour déterminer lorsque le vote prend fin
+    private Firebase mFirebaseMemberRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +56,38 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        Firebase.setAndroidContext(this);
+
+        mFirebaseMemberRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("readyGroups")
+                .child(mCurrentProfile.groupName)
+                .child("members");
+
+        //Récupèrer le nombre de user du groupe. À partir de ce moment cette valeur ne devrait plus changer.
+        //On la passera dans les intents aux prochaines activités.
+        mFirebaseMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                int count = 0;
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    count++;
+                }
+                memberCount = count;
+                System.out.println("MEMBER COUNT : "+memberCount);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+
     }
 
     private void startVoteDateActivity()
     {
         Intent intent = new Intent(this, VoteDateActivity.class);
         intent.putExtra("profile", mCurrentProfile);
+        intent.putExtra("memberCount", memberCount);
         startActivityForResult(intent, REQUEST_CODE_VOTE_DATE_ACTIVITY);
     }
 

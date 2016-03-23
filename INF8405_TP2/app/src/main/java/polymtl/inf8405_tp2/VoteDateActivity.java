@@ -36,10 +36,10 @@ public class VoteDateActivity extends AppCompatActivity {
     private TextView mLblCount1;
     private TextView mLblCount2;
     private TextView mLblCount3;
-
     private RadioGroup mRadioGroup;
 
     private int[] voteCount;
+    private int memberCount = Integer.MAX_VALUE; //Utilisé pour déterminer lorsque le vote prend fin
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +47,7 @@ public class VoteDateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_vote_date);
 
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        memberCount = (int)getIntent().getExtras().get("memberCount");
 
         Firebase.setAndroidContext(this);
         mFirebaseGroupRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
@@ -57,7 +58,7 @@ public class VoteDateActivity extends AppCompatActivity {
         mFirebaseVoteRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
                 .child("readyGroups")
                 .child(mCurrentProfile.groupName)
-                .child("Votes");
+                .child("VotesDate");
 
         mRadioGroup = (RadioGroup)findViewById(R.id.rbGroupDate);
         mLblTime1 = (TextView) findViewById(R.id.lblTime1);
@@ -129,6 +130,16 @@ public class VoteDateActivity extends AppCompatActivity {
                 }
 
                 System.out.println("DATA CHANGED!");
+                int voteCountTotal = 0;
+                for(int i=0; i<3; i++)
+                {
+                    voteCountTotal+=voteCount[i];
+                }
+
+                if(voteCountTotal>=memberCount)
+                {
+                    System.out.println("VOTE DATE COMPLETED!");
+                }
 
             }
 
@@ -316,8 +327,6 @@ public class VoteDateActivity extends AppCompatActivity {
     public void GetGroupUsers()
     {
         users = new ArrayList<String>();
-
-        Firebase.setAndroidContext(this);
 
         //Récupéré les users du groupe
         mFirebaseGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
