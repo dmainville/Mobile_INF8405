@@ -31,8 +31,6 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
-    Double mLongitude;
-    Double mLatitude;
     Marker meetingMarker;
     Button mBtnSkip;
 
@@ -42,14 +40,11 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_map);
 
-        mLongitude = 0.0;
-        mLatitude = 0.0;
-
         mBtnSkip = (Button) findViewById(R.id.btnSkip);
         mBtnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startVoteDateActivity();
+                //startVoteDateActivity();
             }
         });
 
@@ -74,9 +69,9 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
-
+        System.out.println("lat : "+mCurrentProfile.meetingLatitude+" long : "+mCurrentProfile.meetingLongitude);
         // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(mCurrentProfile.latitude, mCurrentProfile.longitude);
+        LatLng latlng = new LatLng(mCurrentProfile.meetingLatitude, mCurrentProfile.meetingLongitude);
         meetingMarker = mMap.addMarker(new MarkerOptions()
                 .position(latlng)
                 .title("Meeting Area"));

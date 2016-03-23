@@ -81,6 +81,12 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
                 if (snapshot.hasChild("members")) {
                     mArrayList.clear();
+                    for (DataSnapshot prop : snapshot.child("members").getChildren()) {
+                        if (prop.getKey() == "latitude")
+                            mCurrentProfile.meetingLatitude += (Double) prop.getValue();
+                        if (prop.getKey() == "longitude")
+                            mCurrentProfile.meetingLongitude += (Double) prop.getValue();
+                    }
                     mArrayList.addAll(((Map<String, Object>) snapshot.child("members").getValue()).keySet());
                     mArrayAdapter.notifyDataSetChanged();
                     System.out.println("NEW MEMBER DETECTED");

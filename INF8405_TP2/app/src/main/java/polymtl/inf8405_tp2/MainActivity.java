@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (VerifyInformation())
                 {
+                    locations.UpdateLocation(MainActivity.this);
                     Register();
                     // Procéder à la prochaine activité
                     startWaitingRoomActivity();
