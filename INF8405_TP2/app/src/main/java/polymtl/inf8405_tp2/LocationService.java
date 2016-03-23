@@ -9,9 +9,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 
-/**
- * Created by Thomas on 22/03/2016.
- */
 public class LocationService implements LocationListener{
     Location currentLocation = null;
     LocationManager mLocationManager;

@@ -18,6 +18,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -30,6 +31,9 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
+    Double mLongitude;
+    Double mLatitude;
+    Marker meetingMarker;
     Button mBtnSkip;
 
 
@@ -37,6 +41,9 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vote_map);
+
+        mLongitude = 0.0;
+        mLatitude = 0.0;
 
         mBtnSkip = (Button) findViewById(R.id.btnSkip);
         mBtnSkip.setOnClickListener(new View.OnClickListener() {
@@ -55,7 +62,6 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     }
 
-
     private void startVoteDateActivity()
     {
         Intent intent = new Intent(this, VoteDateActivity.class);
@@ -63,22 +69,18 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         startActivityForResult(intent, REQUEST_CODE_VOTE_DATE_ACTIVITY);
     }
 
-
-
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
 
-        Location loc = new Location("Meeting Area");
-        loc.setLongitude(mCurrentProfile.meetingLongitude);
-        loc.setLatitude(mCurrentProfile.meetingLatitude);
         // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(latlng).title(loc.getProvider()));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+        LatLng latlng = new LatLng(mCurrentProfile.latitude, mCurrentProfile.longitude);
+        meetingMarker = mMap.addMarker(new MarkerOptions()
+                .position(latlng)
+                .title("Meeting Area"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(meetingMarker.getPosition()));
 
     }
 }
