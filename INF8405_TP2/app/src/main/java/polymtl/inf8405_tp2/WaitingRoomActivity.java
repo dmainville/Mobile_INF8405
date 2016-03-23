@@ -7,20 +7,21 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.MutableData;
 import com.firebase.client.Query;
+import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class WaitingRoomActivity extends AppCompatActivity {
-
-    final private int REQUEST_CODE_VOTE_MAP_ACTIVITY = 1;
 
     private UserProfile mCurrentProfile;
     private ListView mReadyUsersList;
@@ -30,6 +31,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
     private Button mAdminStartButton;
     private Firebase myFirebaseGroupRef;
+    private ValueEventListener mValueEventListener; //< On garde une référece pour pouvoir l'enlever
+
+    private boolean removeLocalUserOnFinish = true; //< Indique si on va enlever l'usager de la liste des ready, par exemple si l'usager fait back
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +49,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
         // recueillir les valeurs passées
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
 
-        // assigner la référence pour le bouton
+        // mettre le bouton continue invisible. On le rendra visible si la BD dit qu'on est admin
         mAdminStartButton = (Button) findViewById(R.id.adminStartButton);
-        if(mCurrentProfile.organizer)
-            mAdminStartButton.setVisibility(View.VISIBLE);
-        else
-            mAdminStartButton.setVisibility(View.INVISIBLE);
+        mAdminStartButton.setVisibility(View.INVISIBLE);
 
         //setup la connexion à la BD
         Firebase.setAndroidContext(this);
@@ -59,12 +60,35 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 .child("readyGroups")
                 .child(mCurrentProfile.groupName);
 
-        // TODO: chercher la liste des usagers qui sont déjà prêts (créer une fonction pour ça et remplacer le contenu de onDataChange pour qu'il appelle cette fonction)
-        //Pas sur que c'est nécessaire. Puisqu'on ajoute notre user, le onChange est callé et popule la liste.
+
+        // Si l'usager a coché la case organizer, devenir admin s'il n'y en a pas déjà un sur la bd
+        if (mCurrentProfile.organizer) {
+            // On décoche le fait qu'on est admin, parce qu'il faut que la bd le confirme
+            mCurrentProfile.organizer = false;
+
+            myFirebaseGroupRef.child("organizer").runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData currentData) {
+                    // S'il n'y a pad d'organisateur, on se met comme organisateur
+                    if (currentData.getValue() == null) {
+                        currentData.setValue(mCurrentProfile.getSanitizedEmail());
+                    } else {
+                    }
+                    return Transaction.success(currentData); //we can also abort by calling Transaction.abort()
+                }
+                @Override
+                public void onComplete(FirebaseError firebaseError, boolean committed, DataSnapshot currentData) {
+                    //This method will be called once with the results of the transaction.
+                }
+            });
+        }
+
+
+
 
         // Ajouter un event listener pour s'il y a changement aux membres prêts pour ce groupe
-        myFirebaseGroupRef.addValueEventListener(new ValueEventListener() {
-            //TODO: Opter plutot pour onChildAdded et onChildChanged pour éviter d'avoir à réécrire la liste complète à chaque fois
+        myFirebaseGroupRef.addValueEventListener(mValueEventListener = new ValueEventListener() {
+            //TODO: Opter plutot pour onChildAdded et onChildChanged pour éviter d'avoir à réécrire la liste complète à chaque fois?
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 //Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
@@ -72,18 +96,24 @@ public class WaitingRoomActivity extends AppCompatActivity {
                     if ((Boolean) snapshot.child("readyState").getValue()) {
                         // Move to next activity
                         startVoteMapActivity();
-                        // TODO: Stop this current activity? (remove from history stack)
                     }
                 }
-
-
-                // TODO: Il faut effectuer un fetch au début, au cas où il y aurait déjà du monde ready.
 
                 if (snapshot.hasChild("members")) {
                     mArrayList.clear();
                     mArrayList.addAll(((Map<String, Object>) snapshot.child("members").getValue()).keySet());
                     mArrayAdapter.notifyDataSetChanged();
                     System.out.println("NEW MEMBER DETECTED");
+                }
+
+                // Si la BD dit qu'on est admin, afficher le bouton
+                if (snapshot.hasChild("organizer")) {
+                    if (snapshot.child("organizer").getValue().toString().equals(mCurrentProfile.getSanitizedEmail())) {
+                        mAdminStartButton.setVisibility(View.VISIBLE);
+                        // remettre la valeur à true si la BD la confirmé
+                        mCurrentProfile.organizer = true;
+                        ((TextView) findViewById(R.id.organizerTextView)).setText(snapshot.child("organizer").getValue().toString());
+                    }
                 }
             }
 
@@ -108,8 +138,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
         });
     }
 
-    // TODO: Si l'usager quitte cette activité avant que le meeting soit appelé, on doit l'enlver de
-    // liste des ready
 
     private void startVoteMapActivity()
     {
@@ -121,17 +149,30 @@ public class WaitingRoomActivity extends AppCompatActivity {
         intent.putExtra("profile", mCurrentProfile);
         // TODO: est-ce qu'on pass la liste comme ça ou on le re-fetch dans la BD?
         intent.putExtra("users", mArrayList);
-        // TODO: est-ce qu'on a besoin du result?
-        startActivityForResult(intent, REQUEST_CODE_VOTE_MAP_ACTIVITY);
+        startActivity(intent);
+        // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin
+        removeLocalUserOnFinish = false;
+        finish();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // Enlever les listeners
+        myFirebaseGroupRef.removeEventListener(mValueEventListener);
 
-        //Tentative de remove le user lorsqu'il quitte et que le groupe n'est pas rdy.
-        //Mais je ne suis pas sur de comment query
-        /*Query q = myFirebaseGroupRef;
+        // Enlever l'usager des ready si on ne passe pas au vote
+        if (removeLocalUserOnFinish)
+        {
+            myFirebaseGroupRef.child("members").child(mCurrentProfile.getSanitizedEmail()).removeValue();
+            //Si on était admin, s'enlever aussi comme admin
+            if (mCurrentProfile.organizer)
+            {
+                myFirebaseGroupRef.child("organizer").removeValue();
+            }
+        }
+        /*
+        Query q = myFirebaseGroupRef;
         q.addChildEventListener(new ChildEventListener() {
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 System.out.println("LEAVING QUERY");

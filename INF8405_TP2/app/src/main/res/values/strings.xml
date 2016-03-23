@@ -5,7 +5,7 @@
     <string name="prompt_email">Email</string>
     <string name="prompt_group_name">Nom du groupe</string>
     <string name="prompt_picture">Photo du membre (Clicker pour modifier)</string>
-    <string name="prompt_organisateur">Organisateur des rencontres</string>
+    <string name="prompt_organisateur">Organisateur des rencontres (si le poste est vacant)</string>
     <string name="prompt_preference">Ecrire une nouvelle preference</string>
     <string name="action_sign_in">Log in</string>
     <string name="error_invalid_email">This email address is invalid</string>

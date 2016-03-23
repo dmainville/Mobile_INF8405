@@ -33,4 +33,22 @@
         android:id="@+id/adminStartButton"
         android:layout_below="@+id/listView"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Organisateur:"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Inconnu / aucun"
+        android:id="@+id/organizerTextView"
+        android:layout_below="@+id/textView"
+        android:layout_toEndOf="@+id/textView2" />
 </RelativeLayout>
