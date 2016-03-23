@@ -63,6 +63,20 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 .child(mCurrentProfile.groupName)
                 .child("members");
 
+        //TODO: admin calculates center point (average)
+        //TODO: admin calculates favourite spots and puts them in a list
+        //TODO: admin querries google for favourite spots closest to coord.
+        //TODO: admin puts coordinates for point online
+
+
+        //TODO: everyone listens for meeting points change and recuperate points
+        //TODO: everyone updates google maps with pins on this location
+        //TODO: evertone shows vote buttons
+        //TODO: everyone votes
+        //TODO: everyone uploads data
+        //TODO: everyone unregisters listeners and moves on to next page
+        
+
         //Récupèrer le nombre de user du groupe. À partir de ce moment cette valeur ne devrait plus changer.
         //On la passera dans les intents aux prochaines activités.
         mFirebaseMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -96,7 +110,10 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
         System.out.println("ON_MAP_READY");
         mMap = googleMap;
+
+
         System.out.println("lat : "+mCurrentProfile.meetingLatitude+" long : "+mCurrentProfile.meetingLongitude);
+
         // Add a marker in Sydney and move the camera
         LatLng latlng = new LatLng(mCurrentProfile.meetingLatitude, mCurrentProfile.meetingLongitude);
         meetingMarker = mMap.addMarker(new MarkerOptions()

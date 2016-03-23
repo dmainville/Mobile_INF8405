@@ -61,6 +61,25 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 .child("readyGroups")
                 .child(mCurrentProfile.groupName);
 
+        // S'ajouter à la BD si on n'est pas déjà là.
+        // Ajouter l'usager à la liste des usagers prêts. La valeur deviendra vraie s'ils sont toujours présents quand l'admin débute la séance.
+
+        myFirebaseGroupRef.child("members").runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData currentData) {
+                if (!currentData.hasChild(mCurrentProfile.getSanitizedEmail()) || !((Boolean)currentData.child(mCurrentProfile.getSanitizedEmail()).getValue()).equals(Boolean.TRUE))
+                {
+                    currentData.child(mCurrentProfile.getSanitizedEmail()).setValue(false);
+                }
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(FirebaseError firebaseError, boolean b, DataSnapshot dataSnapshot) {
+
+            }
+        });
+
 
         // Si l'usager a coché la case organizer, devenir admin s'il n'y en a pas déjà un sur la bd
         if (mCurrentProfile.organizer) {
@@ -134,8 +153,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
             }
         });
 
-        // Ajouter l'usager à la liste des usagers prêts. La valeur deviendra vraie s'ils sont toujours présents quand l'admin débute la séance.
-        myFirebaseGroupRef.child("members").child(mCurrentProfile.getSanitizedEmail()).setValue(false);
 
 
         // Ajouter un event listener pour le bouton pour l'admin
