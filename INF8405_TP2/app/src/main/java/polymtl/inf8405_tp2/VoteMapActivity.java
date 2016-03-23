@@ -43,41 +43,60 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     }
 
-    public void GetUsersEvents(ArrayList<String> users)
+    public void ChooseBestAvailabilities()
+    {
+        //À partir de la date actuel, itérer de 2h et trouver 3 zones d'ici à trois jours qui contiennet le moins de conflit
+        
+    }
+
+    public void GetUsersEvents()
     {
         events = new ArrayList<CalendarEvent>();
         Firebase.setAndroidContext(this);
 
         System.out.println("GET USERS EVENT");
 
-        for (String user : users)
+        //Récupéré les event des users
+        mFirebaseRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("UserProfiles");
+
+        mFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener()
         {
-            System.out.println("LOOKING FOR USER :"+user);
+            @Override
+            public void onDataChange(DataSnapshot snapshot)
+            {
 
-            //Récupéré les event du user
-            mFirebaseRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
-                    .child("UserProfiles")
-                    .child(user);
+                for (DataSnapshot child : snapshot.getChildren())
+                {
+                    if(!users.contains(child.getKey()))
+                        continue;
 
-            mFirebaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    for (DataSnapshot child : snapshot.getChildren()) {
-                        if(child.getKey()!="events")
+                    for (DataSnapshot properties : child.getChildren())
+                    {
+                        if(properties.getKey() != "events")
                             continue;
 
-                        System.out.println("EVENTS : "+child.getValue());
-
+                        System.out.println("EVENTS : " + properties.getValue());
+                        String strEvents[] = properties.getValue().toString().split(",");
+                        for(String strEvent : strEvents)
+                        {
+                            events.add(new CalendarEvent(strEvent));
+                        }
                     }
-
-
-
                 }
 
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {}
-            });
-        }
+                for(CalendarEvent event : events)
+                {
+                    System.out.println("EVENT COMPLETE LIST : "+event);
+                }
+
+                ChooseBestAvailabilities();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {}
+        });
+
     }
 
 
@@ -101,7 +120,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                     users.add(child.getKey());
                 }
 
-                GetUsersEvents(users);
+                GetUsersEvents();
             }
 
             @Override

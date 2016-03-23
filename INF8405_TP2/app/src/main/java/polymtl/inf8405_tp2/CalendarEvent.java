@@ -17,9 +17,21 @@ public class CalendarEvent implements Serializable {
         this.eventName = eventName;
     }
 
+    public CalendarEvent(String data)
+    {
+        data = data.replace('[', ' ');
+        data = data.replace(']',' ');
+
+        String values[] = data.split("-");
+
+        this.eventStart = Long.parseLong(values[0].trim());
+        this.eventEnd = Long.parseLong(values[1].trim());
+    }
+
     public String toString()
     {
-        return eventStart.toString()+"-"+eventEnd+"-"+eventName;
+        //On ne se sert pas du event name
+        return eventStart.toString()+"-"+eventEnd.toString();
     }
 
 }
