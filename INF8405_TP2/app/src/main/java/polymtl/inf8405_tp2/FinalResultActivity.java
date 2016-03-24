@@ -1,8 +1,12 @@
 package polymtl.inf8405_tp2;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -24,9 +28,14 @@ public class FinalResultActivity extends AppCompatActivity {
     private TextView mLblLocation;
     private TextView mLblDescription;
     private ImageView mImgDescription;
+    private TextView mLblBatterie;
 
     //Profile
     private UserProfile mCurrentProfile;
+
+    //Batterie
+    private int InitialBatterieLevel;
+    private boolean BatterieOnce = false; //Afficher la modification de la batterie seulement une fois
 
     //Référence a la base de données
     private Firebase mFirebaseVoteRef;
@@ -39,12 +48,18 @@ public class FinalResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_final_result);
 
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        InitialBatterieLevel = (int) getIntent().getExtras().get("batterie");
+
+        System.out.println("FINAL BATTERIE INITIAL : "+InitialBatterieLevel);
 
         mBtnRetour = (Button) findViewById(R.id.btnRecommencer);
         mLblDate = (TextView) findViewById(R.id.lblDate);
         mLblLocation = (TextView) findViewById(R.id.lblLocation);
         mLblDescription = (TextView) findViewById(R.id.lblDescription);
         mImgDescription = (ImageView) findViewById(R.id.imgDescription);
+        mLblBatterie = (TextView) findViewById(R.id.tbBatterie);
+
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         Firebase.setAndroidContext(this);
         mFirebaseGroupsRef = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
@@ -119,6 +134,21 @@ public class FinalResultActivity extends AppCompatActivity {
         });
 
     }
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+
+            if(!BatterieOnce)
+            {
+                BatterieOnce = true;
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                System.out.println("BATTERIE : "+level);
+                mLblBatterie.setText("Batterie consommé par l'application : "+(InitialBatterieLevel-level)+"%");
+            }
+
+        }
+    };
 
     public void gotoMainActivity()
     {

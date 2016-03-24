@@ -39,6 +39,7 @@ public class AdminAfterVoteActivity extends AppCompatActivity {
 
     //Profile
     private UserProfile mCurrentProfile;
+    private int InitialBatterieLevel;
 
     //Référence a la base de données
     private Firebase mFirebaseGroupRef;
@@ -51,6 +52,7 @@ public class AdminAfterVoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin_after_vote);
 
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        InitialBatterieLevel = (int) getIntent().getExtras().get("batterie");
 
         mBtnOk = (Button) findViewById(R.id.btnOk);
         mTbDescription = (EditText) findViewById(R.id.tbDescription);
@@ -90,6 +92,7 @@ public class AdminAfterVoteActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(this, FinalResultActivity.class);
         intent.putExtra("profile", mCurrentProfile);
+        intent.putExtra("batterie", InitialBatterieLevel);
         startActivity(intent);
 
         // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin

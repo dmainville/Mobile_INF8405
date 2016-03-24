@@ -53,4 +53,13 @@
         android:layout_below="@+id/lblDescription"
         android:layout_alignParentStart="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Batterie consommé par l&apos;application : ?"
+        android:id="@+id/tbBatterie"
+        android:layout_alignBottom="@+id/imgDescription"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

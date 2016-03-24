@@ -21,6 +21,7 @@ import java.util.Date;
 
 public class VoteDateActivity extends AppCompatActivity {
 
+    //Référence de base de données
     Firebase mFirebaseRef;
     Firebase mFirebaseGroupRef;
     Firebase mFirebaseVoteRef;
@@ -28,8 +29,10 @@ public class VoteDateActivity extends AppCompatActivity {
     ArrayList<String> users;
     ArrayList<CalendarEvent> events;
     private UserProfile mCurrentProfile;
+    private int InitialBatterieLevel;
     Calendar[] availabilities;
 
+    //Ui
     private Button mBtnVote;
     private TextView mLblTime1;
     private TextView mLblTime2;
@@ -39,6 +42,7 @@ public class VoteDateActivity extends AppCompatActivity {
     private TextView mLblCount3;
     private RadioGroup mRadioGroup;
 
+    //Application date
     private int[] voteCount;
     private int memberCount = Integer.MAX_VALUE; //Utilisé pour déterminer lorsque le vote prend fin
 
@@ -48,6 +52,7 @@ public class VoteDateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_vote_date);
 
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        InitialBatterieLevel = (int) getIntent().getExtras().get("batterie");
         memberCount = (int)getIntent().getExtras().get("memberCount");
 
         Firebase.setAndroidContext(this);
@@ -187,6 +192,7 @@ public class VoteDateActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(this, FinalResultActivity.class);
         intent.putExtra("profile", mCurrentProfile);
+        intent.putExtra("batterie", InitialBatterieLevel);
         startActivity(intent);
 
         // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin
@@ -197,6 +203,7 @@ public class VoteDateActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(this, AdminAfterVoteActivity.class);
         intent.putExtra("profile", mCurrentProfile);
+        intent.putExtra("batterie", InitialBatterieLevel);
         startActivity(intent);
 
         // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin
