@@ -59,9 +59,9 @@
                     android:layout_marginLeft="25dp"
                     android:text="@string/prompt_organisateur"
                     android:id="@+id/organisateur"
-                    android:layout_marginStart="128dp"
                     android:layout_alignTop="@+id/photo"
-                    android:layout_toEndOf="@+id/photo" />
+                    android:layout_toEndOf="@+id/photo"
+                    android:layout_above="@+id/btn_preferences" />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -90,14 +90,17 @@
                     android:layout_alignTop="@+id/btn_preferences"
                     android:layout_marginLeft="10dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="Ajoute des preferences"
-                        android:id="@+id/login_preferences"
-                        android:maxLines="1"
-                        android:gravity="center" />
                 </HorizontalScrollView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Ajoute des preferences"
+                    android:id="@+id/login_preferences"
+                    android:maxLines="1"
+                    android:gravity="center"
+                    android:layout_below="@+id/btn_preferences"
+                    android:layout_alignStart="@+id/btn_preferences" />
 
             </RelativeLayout>
         </ScrollView>

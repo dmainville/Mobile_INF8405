@@ -2,9 +2,11 @@ package polymtl.inf8405_tp2;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +14,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private LocationService locations;
     private UserProfile currentProfile;
+    private int InitialBatterieLevel = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +92,21 @@ public class MainActivity extends AppCompatActivity {
 
         ordrePreferences = new ArrayList<>();
 
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         initializeListener(); ///< Ajouter les listeners aux boutons
         locations = new LocationService(this); ///< commencer à chercher la position
         LoadInitialProfile();
     }
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            System.out.println("BATTERIE : "+level);
+            InitialBatterieLevel = level;
+        }
+    };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -251,7 +266,9 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, WaitingRoomActivity.class);
         intent.putExtra("profile", currentProfile);
+        intent.putExtra("batterie", InitialBatterieLevel);
         startActivityForResult(intent, REQUEST_CODE_WAITING_ROOM_ACTIVITY);
+
     }
 
     public void initializeListener() {

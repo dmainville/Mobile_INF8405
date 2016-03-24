@@ -27,6 +27,9 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
+
+    private int InitialBatterieLevel;
+    Marker meetingMarker;
     Button mBtnSkip;
     private Firebase mFirebaseMemberRef;
     private Firebase mFirebaseUserProfiles;
@@ -55,6 +58,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         });
 
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        InitialBatterieLevel = (int) getIntent().getExtras().get("batterie");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -82,6 +86,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
         Intent intent = new Intent(this, VoteDateActivity.class);
         intent.putExtra("profile", mCurrentProfile);
         intent.putExtra("memberCount", numberOfMembers);
+		intent.putExtra("batterie", InitialBatterieLevel);
         startActivityForResult(intent, REQUEST_CODE_VOTE_DATE_ACTIVITY);
     }
 
@@ -217,6 +222,7 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
             marker.setAlpha((float)0.5);
             //mMap.moveCamera(CameraUpdateFactory.newLatLng(meetingMarker.getPosition()));
         }
+
     }
 
     private void centerOnSelf()

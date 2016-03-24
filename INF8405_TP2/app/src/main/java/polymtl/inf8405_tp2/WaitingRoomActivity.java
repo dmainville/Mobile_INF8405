@@ -25,6 +25,9 @@ import java.util.Map;
 public class WaitingRoomActivity extends AppCompatActivity {
 
     private UserProfile mCurrentProfile;
+    private int InitialBatterieLevel;
+
+
     private ListView mReadyUsersList;
 
     private ArrayAdapter<String> mArrayAdapter;
@@ -49,6 +52,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
         // recueillir les valeurs passées
         mCurrentProfile = (UserProfile) getIntent().getExtras().get("profile");
+        InitialBatterieLevel = (int) getIntent().getExtras().get("batterie");
 
         // mettre le bouton continue invisible. On le rendra visible si la BD dit qu'on est admin
         mAdminStartButton = (Button) findViewById(R.id.adminStartButton);
@@ -114,13 +118,11 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 //Ajouter un listener pour savoir si l'admin a décidé de passer au vote.
                 if (snapshot.hasChild("readyState")) {
                     // On vérifie si notre valeur a été mis à true
-                    if (((Boolean)snapshot.child("members/"+mCurrentProfile.getSanitizedEmail()).getValue()).equals(Boolean.TRUE))
-                    {
+                    if (((Boolean) snapshot.child("members/" + mCurrentProfile.getSanitizedEmail()).getValue()).equals(Boolean.TRUE)) {
                         startVoteMapActivity();
-                    }
-                    else if ((boolean) snapshot.child("readyState").getValue() == true) {
+                    } else if ((boolean) snapshot.child("readyState").getValue() == true) {
                         // Move to next activity
-                        Toast.makeText(WaitingRoomActivity.this, "Le vote est déjà commencé pour ce groupe.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(WaitingRoomActivity.this, "Le vote est déjà commencé pour ce groupe.", Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -182,6 +184,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(this, VoteMapActivity.class);
         intent.putExtra("profile", mCurrentProfile);
+        intent.putExtra("batterie", InitialBatterieLevel);
         // TODO: est-ce qu'on pass la liste comme ça ou on le re-fetch dans la BD?
         intent.putExtra("users", mArrayList);
         startActivity(intent);
