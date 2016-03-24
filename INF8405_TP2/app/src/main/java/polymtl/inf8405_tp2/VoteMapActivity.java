@@ -1,10 +1,7 @@
 package polymtl.inf8405_tp2;
 
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,8 +19,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 
 public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -31,10 +27,19 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private UserProfile mCurrentProfile;
-    Marker meetingMarker;
     Button mBtnSkip;
-    private int memberCount = Integer.MAX_VALUE; //Utilisé pour déterminer lorsque le vote prend fin
     private Firebase mFirebaseMemberRef;
+    private Firebase mFirebaseUserProfiles;
+    private Firebase mFirebaseMeetingLocations;
+
+
+    private HashMap<String, LatLng> mMemberCoordinates = new HashMap<>();
+    private ArrayList<String> mTeammates = new ArrayList<>();
+    private LatLng[] mVoteOptions = new LatLng[3];
+    private LatLng averageCoordinates;
+
+    private Integer numberOfMembers = 0;
+    private HashMap<String, Integer> locationsVote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,63 +68,159 @@ public class VoteMapActivity extends FragmentActivity implements OnMapReadyCallb
                 .child(mCurrentProfile.groupName)
                 .child("members");
 
-        //TODO: admin calculates center point (average)
-        //TODO: admin calculates favourite spots and puts them in a list
-        //TODO: admin querries google for favourite spots closest to coord.
-        //TODO: admin puts coordinates for point online
+        mFirebaseUserProfiles = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("UserProfiles");
 
-
-        //TODO: everyone listens for meeting points change and recuperate points
-        //TODO: everyone updates google maps with pins on this location
-        //TODO: evertone shows vote buttons
-        //TODO: everyone votes
-        //TODO: everyone uploads data
-        //TODO: everyone unregisters listeners and moves on to next page
-        
-
-        //Récupèrer le nombre de user du groupe. À partir de ce moment cette valeur ne devrait plus changer.
-        //On la passera dans les intents aux prochaines activités.
-        mFirebaseMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                int count = 0;
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    count++;
-                }
-                memberCount = count;
-                System.out.println("MEMBER COUNT : "+memberCount);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-            }
-        });
-
+        mFirebaseMeetingLocations = new Firebase("https://sizzling-inferno-7505.firebaseio.com/")
+                .child("readyGroups")
+                .child(mCurrentProfile.groupName)
+                .child("meetingLocations");
     }
 
     private void startVoteDateActivity()
     {
         Intent intent = new Intent(this, VoteDateActivity.class);
         intent.putExtra("profile", mCurrentProfile);
-        intent.putExtra("memberCount", memberCount);
+        intent.putExtra("memberCount", numberOfMembers);
         startActivityForResult(intent, REQUEST_CODE_VOTE_DATE_ACTIVITY);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        System.out.println("ON_MAP_READY");
         mMap = googleMap;
 
+        centerOnSelf();
 
-        System.out.println("lat : "+mCurrentProfile.meetingLatitude+" long : "+mCurrentProfile.meetingLongitude);
+        locateTeammates();
 
-        // Add a marker in Sydney and move the camera
-        LatLng latlng = new LatLng(mCurrentProfile.meetingLatitude, mCurrentProfile.meetingLongitude);
-        meetingMarker = mMap.addMarker(new MarkerOptions()
-                .position(latlng)
-                .title("Meeting Area"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(meetingMarker.getPosition()));
 
+        //TODO: everyone listens for meeting points change and recuperate points
+        mFirebaseMeetingLocations.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        //TODO: evertone shows vote buttons
+        //TODO: everyone votes
+        //TODO: everyone uploads data
+        //TODO: everyone unregisters listeners and moves on to next page
+
+
+    }
+
+
+
+
+    private void locateTeammates()
+    {
+        mFirebaseMemberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot user : dataSnapshot.getChildren())
+                {
+                    if (((Boolean)user.getValue()).equals(Boolean.TRUE))
+                    {
+                        mTeammates.add(user.getKey());
+                    }
+                }
+                mFirebaseUserProfiles.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshotUsers) {
+                        double longitudeSum = 0.0;
+                        double latitudeSum  = 0.0;
+                        for (String teammate : mTeammates)
+                        {
+                            Double longi = Double.parseDouble( (String) dataSnapshotUsers.child(teammate).child("longitude").getValue());
+                            Double lati = Double.parseDouble( (String) dataSnapshotUsers.child(teammate).child("latitude").getValue());
+
+                            if (longi == null)
+                                longi = 0.0;
+                            if (lati == null)
+                                lati = 0.0;
+
+                            longitudeSum += longi;
+                            latitudeSum += lati;
+                            mMemberCoordinates.put(teammate, new LatLng(lati, longi));
+                            numberOfMembers++;
+                        }
+                        addTeammatesToMap();
+                        //on fait la moyenne pour tout le monde car c'est simple à calculer
+                        averageCoordinates = new LatLng(longitudeSum/numberOfMembers, latitudeSum/numberOfMembers);
+                        if (mCurrentProfile.organizer)
+                        {
+                            // TODO: remplacer ces valeurs par les lieux calculés
+                            // TODO: admin calculates favourite spots and puts them in a list
+                            // TODO: admin querries google for favourite spots closest to coord.
+                            mFirebaseMeetingLocations.child("location1").child("longitude").setValue(averageCoordinates.longitude - 0.05);
+                            mFirebaseMeetingLocations.child("location1").child("latitude").setValue(averageCoordinates.latitude - 0.05);
+
+                            mFirebaseMeetingLocations.child("location2").child("longitude").setValue(averageCoordinates.longitude - 0.1);
+                            mFirebaseMeetingLocations.child("location2").child("latitude").setValue(averageCoordinates.latitude + 0.1);
+
+                            mFirebaseMeetingLocations.child("location3").child("longitude").setValue(averageCoordinates.longitude + 0.1);
+                            mFirebaseMeetingLocations.child("location3").child("latitude").setValue(averageCoordinates.latitude - 0.1);
+                        }
+
+                        // permet d'ajouter les pins sur la map
+                        mFirebaseMeetingLocations.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                int i = 0;
+                                for (DataSnapshot coord : dataSnapshot.getChildren()) {
+                                    // Chercher les valeurs
+                                    LatLng pos = new LatLng((Double) coord.child("longitude").getValue(), (Double) coord.child("latitude").getValue());
+
+                                    // Afficher les valeurs
+                                    mMap.addMarker(new MarkerOptions()
+                                            .position(pos)
+                                            .title("Option " + (i+1)));
+
+                                    // Inscrire les valeurs dans le tables
+                                    mVoteOptions[i] = pos;
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+    private void addTeammatesToMap()
+    {
+        for (HashMap.Entry<String, LatLng> teammate : mMemberCoordinates.entrySet()) {
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(teammate.getValue())
+                    .title(teammate.getKey()));
+            marker.setAlpha((float)0.5);
+            //mMap.moveCamera(CameraUpdateFactory.newLatLng(meetingMarker.getPosition()));
+        }
+    }
+
+    private void centerOnSelf()
+    {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mCurrentProfile.latitude, mCurrentProfile.longitude)));
     }
 }
