@@ -9,4 +9,48 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="polymtl.inf8405_tp2.FinalResultActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Horaire Choisi"
+        android:id="@+id/lblDate"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Localisation choisie"
+        android:id="@+id/lblLocation"
+        android:layout_below="@+id/lblDate"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Chargement de la description..."
+        android:id="@+id/lblDescription"
+        android:layout_below="@+id/lblLocation"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mettre Fin Au Groupe"
+        android:id="@+id/btnRecommencer"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:id="@+id/imgDescription"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/prompt_picture"
+        android:clickable="true"
+        android:layout_below="@+id/lblDescription"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>

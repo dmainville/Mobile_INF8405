@@ -1,5 +1,6 @@
 package polymtl.inf8405_tp2;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -77,11 +78,11 @@ public class VoteDateActivity extends AppCompatActivity {
                 int radioButtonID = mRadioGroup.getCheckedRadioButtonId();
                 View radioButton = mRadioGroup.findViewById(radioButtonID);
                 int idx = mRadioGroup.indexOfChild(radioButton);
-                //System.out.println("INDEX : " + idx);
+                System.out.println("INDEX : " + idx);
 
                 //Les indexes des radio button sont 1, 4 et 7. -1 Veux dire que rien  n'est sélectionné
 
-                int idVote = 0;
+                int idVote = -1;
                 switch (idx) {
                     case 1:
                         idVote = 0;
@@ -96,7 +97,7 @@ public class VoteDateActivity extends AppCompatActivity {
                         break;
                 }
 
-                if (idVote != 0) {
+                if (idVote != -1) {
                     System.out.println("VOTE COUNT : " + idVote + " - " + (voteCount[idVote] + 1));
                     mFirebaseVoteRef.child("votes" + (idVote+1)).setValue((voteCount[idVote] + 1));
 
@@ -139,6 +140,39 @@ public class VoteDateActivity extends AppCompatActivity {
                 if(voteCountTotal>=memberCount)
                 {
                     System.out.println("VOTE DATE COMPLETED!");
+                    if(mCurrentProfile.organizer)
+                    {
+                        //Tous les membres ont voté, on peut storé dans la base de donnée le meilleur résultat
+                        int bestId = 0;
+                        for(int i=1; i<3; i++)
+                        {
+                            //On trouve le choix avec le plus de vote
+                            if(voteCount[i] > voteCount[bestId])
+                                bestId = i;
+                        }
+
+                        String voteResult = "";
+                        if(bestId == 0)
+                        {
+                            voteResult = mLblTime1.getText().toString();
+                        }
+                        else if(bestId == 1)
+                        {
+                            voteResult = mLblTime2.getText().toString();
+                        }
+                        else
+                        {
+                            voteResult = mLblTime3.getText().toString();
+                        }
+
+                        mFirebaseVoteRef.child("voteResult").setValue(voteResult);
+                        GotoAdminAfterVote();
+                    }
+                    else
+                    {
+                        GotoFinalResultActivity();
+                    }
+
                 }
 
             }
@@ -147,6 +181,26 @@ public class VoteDateActivity extends AppCompatActivity {
             public void onCancelled(FirebaseError firebaseError) {
             }
         });
+    }
+
+    public void GotoFinalResultActivity()
+    {
+        Intent intent = new Intent(this, FinalResultActivity.class);
+        intent.putExtra("profile", mCurrentProfile);
+        startActivity(intent);
+
+        // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin
+        finish();
+    }
+
+    public void GotoAdminAfterVote()
+    {
+        Intent intent = new Intent(this, AdminAfterVoteActivity.class);
+        intent.putExtra("profile", mCurrentProfile);
+        startActivity(intent);
+
+        // On arrête cette activité lorsqu'on passe au prochain parce qu'on n'en a plus besoin
+        finish();
     }
 
     public void LoadVotes()
