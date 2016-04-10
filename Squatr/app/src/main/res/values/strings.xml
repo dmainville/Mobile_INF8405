@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Squatr</string>
+    <string name="gotoMapButton">Visualiser Carte</string>
+    <string name="settingButton">Paramètres</string>
+    <string name="practiceMinigame1Button">Pratiquer 1er minijeu</string>
+    <string name="practiceMinigame2Button">Pratiquer 2e minijeu</string>
+    <string name="leaderboardButton">Liste des gagnants</string>
+    <string name="saveButton">Sauvegarder</string>
+    <string name="usernameTextView">Nom d\'utilisateur</string>
+</resources>
