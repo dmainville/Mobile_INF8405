@@ -7,4 +7,5 @@
     <string name="leaderboardButton">Liste des gagnants</string>
     <string name="saveButton">Sauvegarder</string>
     <string name="usernameTextView">Nom d\'utilisateur</string>
+    <string name="preferencesWarningTextView">Attention: tous les drapeaux acquis à partir de maintenant porteront ce nom. Vous ne pourrez pas modifier le nom associé à un drapeau déjà acquis.</string>
 </resources>

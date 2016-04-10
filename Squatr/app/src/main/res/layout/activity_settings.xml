@@ -34,4 +34,14 @@
         android:id="@+id/usernameTextView"
         android:layout_alignBottom="@+id/usernameEditText"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/preferencesWarningTextView"
+        android:id="@+id/preferencesWarningTextView"
+        android:layout_below="@+id/saveButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

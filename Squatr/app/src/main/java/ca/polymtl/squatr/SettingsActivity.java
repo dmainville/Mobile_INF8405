@@ -13,6 +13,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         addViewsAndEventListeners();
+        // TODO: load saved username
     }
 
     private void addViewsAndEventListeners() {
@@ -21,7 +22,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // TODO: save username locally
-                // TODO: change username remotely?
                 finish();
             }
         });

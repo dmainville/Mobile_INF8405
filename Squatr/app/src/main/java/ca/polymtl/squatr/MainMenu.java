@@ -14,12 +14,15 @@ public class MainMenu extends AppCompatActivity {
     Button mPracticeMinigame1Button;
     Button mPracticeMinigame2Button;
 
+    String mUsername;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         // assign views to references and set event listeners
         addViewsAndEventListeners();
+        // TODO: load saved username from file
     }
 
     private void addViewsAndEventListeners()
@@ -28,7 +31,7 @@ public class MainMenu extends AppCompatActivity {
         mGotoMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //TODO: prevent action if username is null
             }
         });
 
@@ -46,6 +49,7 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenu.this, SettingsActivity.class);
                 startActivity(intent);
+                // TODO: send username in intent (loaded from file)
             }
         });
 
@@ -65,4 +69,6 @@ public class MainMenu extends AppCompatActivity {
             }
         });
     }
+
+    // TODO: when returning from preferences, either receive new username or reload it from file
 }
