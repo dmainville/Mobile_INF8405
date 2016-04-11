@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainMenu extends AppCompatActivity {
+public class MainMenuActivity extends AppCompatActivity {
 
     Button mGotoMapButton;
     Button mLeaderboardButton;
@@ -32,6 +32,8 @@ public class MainMenu extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //TODO: prevent action if username is null
+                Intent intent = new Intent(MainMenuActivity.this, MapsActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -47,7 +49,7 @@ public class MainMenu extends AppCompatActivity {
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainMenu.this, SettingsActivity.class);
+                Intent intent = new Intent(MainMenuActivity.this, SettingsActivity.class);
                 startActivity(intent);
                 // TODO: send username in intent (loaded from file)
             }
