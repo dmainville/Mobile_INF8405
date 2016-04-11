@@ -125,9 +125,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String owner = flag.child("owner").getValue(String.class);
             Double latitude = flag.child("coords").child("latitude").getValue(Double.class);
             Double longitude = flag.child("coords").child("longitude").getValue(Double.class);
+            Integer highscore = flag.child("highscore").child("highscore").getValue(Integer.class);
+            if (highscore == null)
+            {
+                highscore = 0;
+            }
             if (name != null && latitude != null && longitude != null)
             {
-                Flag newFlag = new Flag(latitude, longitude, name, owner);
+                Flag newFlag = new Flag(latitude, longitude, name, owner, highscore);
                 mAllFlags.add(newFlag);
                 addFlagToMap(newFlag);
             }
@@ -164,4 +169,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         // TODO: function to update List (maybe, unless we go for the clickable marker solution
     }
+
+    // TODO: function to launch one of two games randomly if in proximity
+
+    // TODO: function to treat return value from minigame (compare with high score and upload data if won)
 }
