@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Squatr</string>
+    <string name="gotoMapButton">Visualiser Carte</string>
+    <string name="settingButton">Paramètres</string>
+    <string name="practiceMinigame1Button">Pratiquer 1er minijeu</string>
+    <string name="practiceMinigame2Button">Pratiquer 2e minijeu</string>
+    <string name="leaderboardButton">Liste des gagnants</string>
+    <string name="saveButton">Sauvegarder</string>
+    <string name="usernameTextView">Nom d\'utilisateur: </string>
+    <string name="preferencesWarningTextView">Attention: tous les drapeaux acquis à partir de maintenant porteront ce nom. Vous ne pourrez pas modifier le nom associé à un drapeau déjà acquis.</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="flagsInProximityTextView">Drapeaux accessibles: </string>
+</resources>
