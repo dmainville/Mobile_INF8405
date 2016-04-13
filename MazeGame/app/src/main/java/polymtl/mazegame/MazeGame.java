@@ -5,11 +5,16 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class MazeGame extends AppCompatActivity {
 
@@ -65,13 +70,18 @@ public class MazeGame extends AppCompatActivity {
         setContentView(maze);
     }
 
-    public class MazeView extends View {
+    public class MazeView extends View implements SensorEventListener{
 
         private int width, height, lineWidth;
         float cellWidth, cellHeight;
         float totalCellWidth, totalCellHeight;
         private Paint line, red, black, darkgrey, background;
         Context context;
+        SensorManager sensorManager;
+        Sensor gyro;
+        boolean firstTilt = true;
+        float[] firstTiltValues;
+
 
         public MazeView(Context context){
             super(context);
@@ -86,6 +96,10 @@ public class MazeGame extends AppCompatActivity {
             darkgrey.setColor(Color.DKGRAY);
             background = new Paint();
             background.setColor(Color.WHITE);
+            firstTiltValues = new float[2];
+            sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+            gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_GAME);
             setFocusable(true);
             this.setFocusableInTouchMode(true);
         }
@@ -149,43 +163,90 @@ public class MazeGame extends AppCompatActivity {
             }
         }
 
-        @Override
-        public boolean onTouchEvent(MotionEvent event) {
-            int nextX = (int)(event.getX()/totalCellWidth);
-            int nextY = (int)(event.getY()/totalCellHeight);
-
-            if(nextX>=0 && nextX<=mapSize.first && nextY>=0 && nextY<=mapSize.second){
-                //Move Right
-                if(currentX + 1 == nextX && mazeMapVertical[currentY][currentX]!=1)
-                    currentX++;
-                //Move Left
-                if(currentX - 1 == nextX && mazeMapVertical[currentY][currentX-1]!=1)
-                    currentX--;
-                //Move Down
-                if(currentY + 1 == nextY && mazeMapHorizontal[currentY][currentX]!=1)
-                    currentY++;
-                //Move Up
-                if(currentY - 1 == nextY && mazeMapHorizontal[currentY-1][currentX]!=1)
-                    currentY--;
-
+        //Direction = 1 => Up
+        //Direction = 2 => Right
+        //Direction = 3 => Down
+        //Direction = 4 => Left
+        public void MoveBall(int direction){
+            boolean moved = false;
+            switch (direction){
+                case 1:
+                    //Move Up
+                    if(currentY != 0) {
+                        if (mazeMapHorizontal[currentY - 1][currentX] != 1) {
+                            currentY--;
+                            moved = true;
+                        }
+                    }
+                    break;
+                case 2:
+                    //Move Right
+                    if(currentX != 7) {
+                        if (mazeMapVertical[currentY][currentX] != 1) {
+                            currentX++;
+                            moved = true;
+                        }
+                    }
+                    break;
+                case 3:
+                    //Move Down
+                    if(currentY != 7) {
+                        if (mazeMapHorizontal[currentY][currentX] != 1) {
+                            currentY++;
+                            moved = true;
+                        }
+                    }
+                    break;
+                case 4:
+                    //Move Left
+                    if(currentX != 0) {
+                        if (mazeMapVertical[currentY][currentX - 1] != 1) {
+                            currentX--;
+                            moved = true;
+                        }
+                    }
+                    break;
+            }
+            if(moved){
                 if(currentX==finalPos.first && currentY==finalPos.second)
                     EndGame(true);
 
-                for(Pair<Integer,Integer> pos : fakeFinalPos){
+                /*for(Pair<Integer,Integer> pos : fakeFinalPos){
                     if(currentX == pos.first && currentY == pos.second)
                         EndGame(false);
-                }
+                }*/
 
                 invalidate();
             }
-
-            return super.onTouchEvent(event);
         }
 
         public void EndGame(boolean won){
             Intent endGame = new Intent(context, GameEnded.class);
             endGame.putExtra("GameWon", won);
             startActivity(endGame);
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+//            if(firstTilt){
+//                firstTilt = false;
+//                firstTiltValues[0] = event.values[0];
+//                firstTiltValues
+//            }
+
+            if(event.values[0]<-2)
+                MoveBall(2);
+            if(event.values[0]>2)
+                MoveBall(4);
+            if(event.values[1]<-2)
+                MoveBall(3);
+            if(event.values[1]>2)
+                MoveBall(1);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
         }
     }
 
