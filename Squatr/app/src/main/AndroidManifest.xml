@@ -44,7 +44,13 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape" />
+
+        <activity
+            android:name=".MazeGame"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+
     </application>
 
 </manifest>

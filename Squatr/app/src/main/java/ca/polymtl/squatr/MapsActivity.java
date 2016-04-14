@@ -1,17 +1,27 @@
 package ca.polymtl.squatr;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -24,6 +34,9 @@ import java.util.ArrayList;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private String provider;
+    private LocationManager locationManager;
+    private UserLocation locationListener;
 
     // Our username, passed from previous activity
     private String mUsername = "";
@@ -38,7 +51,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // The reference to the Firebase db root
     Firebase mFirebaseRef;
-
 
 
     @Override
@@ -56,16 +68,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         // TODO: get the username from previous activity
-        mUsername = "";
+        Bundle data = getIntent().getExtras();
+        mUsername = data.getString("Username");
 
         // Setup the proximity list view with the adapter
         mProximityListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, mCloseFlags);
         mProximityListView = (ListView) findViewById(R.id.proximityListView);
         mProximityListView.setAdapter(mProximityListAdapter);
-
-
+        mProximityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MapsActivity.this, MazeGame.class);
+                intent.putExtra("flag", mCloseFlags.get(position).title);
+                intent.putExtra("highscore", mCloseFlags.get(position).highscore);
+                startActivityForResult(intent, 1);
+            }
+        });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == 0) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
+                    t.show();
+                    return;
+                }
+                locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
+                Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
+                t.show();
+            } else {
+                Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
+                t.show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 1 && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            int highscore = extras.getInt("highscore");
+            String flag = extras.getString("flag");
+
+            System.out.println("New highscore = " + highscore + " on flag " + flag);
+            //if(highscore != 0)
+              //Load new highscore on DB
+        }
+    }
 
     /**
      * Manipulates the map once available.
@@ -79,24 +132,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         mMap.setMyLocationEnabled(true);
 
         // TODO: move to current location
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
-
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng();
 
         // request update from db for flag locations and add change listener
         mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
@@ -104,8 +146,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onDataChange(DataSnapshot snapshot) {
                 reloadAllFlags(snapshot);
             }
-            @Override public void onCancelled(FirebaseError error) { }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+            }
         });
+
+        Criteria criteria = new Criteria();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(criteria, false);
+        locationListener = new UserLocation();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+        }
+        locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
     }
 
     // This method is called when there is a change in the flags on the database.
@@ -164,13 +219,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // TODO: function to detect which coords are in proximity
     // TODO: or function to check if coord in param is close enough to us
 
-
-    private void updateProximityList()
+    private void updateProximityList(Location location)
     {
+        for(Flag flag : mAllFlags){
+            Location flagLoc = new Location("flag");
+            flagLoc.setLatitude(flag.latitude);
+            flagLoc.setLongitude(flag.longitude);
+            if(location.distanceTo(flagLoc) < 100) {
+                mCloseFlags.add(flag);
+            }
+        }
         // TODO: function to update List (maybe, unless we go for the clickable marker solution
     }
 
     // TODO: function to launch one of two games randomly if in proximity
 
     // TODO: function to treat return value from minigame (compare with high score and upload data if won)
+
+    private class UserLocation implements LocationListener{
+        private boolean firstUpdate = true;
+
+        @Override
+        public void onLocationChanged(Location location) {
+            if(firstUpdate){
+                firstUpdate = false;
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(),location.getLongitude())));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            }
+
+            updateProximityList(location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+        }
+    }
 }

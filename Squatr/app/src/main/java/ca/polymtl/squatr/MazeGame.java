@@ -1,4 +1,4 @@
-package polymtl.mazegame;
+package ca.polymtl.squatr;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +9,20 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
+import android.widget.Chronometer;
+import android.widget.GridLayout;
 
 public class MazeGame extends AppCompatActivity {
 
+    private int highscore;
+    private String flag;
+    private GridLayout zoneDeJeu;
+    Chronometer chrono;
     private int[][] mazeMapVertical;
     private int[][] mazeMapHorizontal;
     private int currentX, currentY;
@@ -28,24 +35,31 @@ public class MazeGame extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maze_game);
 
+        Bundle data = getIntent().getExtras();
+        highscore = data.getInt("highscore");
+        flag = data.getString("flag");
+
+        zoneDeJeu = (GridLayout) findViewById(R.id.zoneDeJeu);
+        chrono = (Chronometer) findViewById(R.id.chronometer);
+
         mazeMapVertical = new int[][]{
-            {1,0,0,0,1,0,0},
-            {0,1,1,0,1,1,1},
-            {1,0,1,0,0,1,0},
-            {0,1,0,0,0,1,0},
-            {0,0,1,0,0,0,0},
-            {1,0,1,0,0,0,0},
-            {0,1,0,1,0,0,0},
-            {0,0,0,0,0,0,0}
+                {1,0,0,0,1,0,0},
+                {0,1,1,0,1,1,1},
+                {1,0,1,0,0,1,0},
+                {0,1,0,0,0,1,0},
+                {0,0,1,0,0,0,0},
+                {1,0,1,0,0,0,0},
+                {0,1,0,1,0,0,0},
+                {0,0,0,0,0,0,0}
         };
         mazeMapHorizontal = new int[][]{
-            {0,0,1,0,0,0,0,0},
-            {0,1,0,0,0,0,0,0},
-            {1,0,0,1,1,1,0,1},
-            {0,1,1,1,0,0,1,0},
-            {0,1,0,1,1,1,1,1},
-            {1,0,1,0,1,1,0,1},
-            {0,0,0,1,0,1,1,1}
+                {0,0,1,0,0,0,0,0},
+                {0,1,0,0,0,0,0,0},
+                {1,0,0,1,1,1,0,1},
+                {0,1,1,1,0,0,1,0},
+                {0,1,0,1,1,1,1,1},
+                {1,0,1,0,1,1,0,1},
+                {0,0,0,1,0,1,1,1}
         };
 
         mapSize = new Pair<>(8,8);
@@ -65,10 +79,10 @@ public class MazeGame extends AppCompatActivity {
                 new Pair(3,7)
         };
         MazeView maze = new MazeView(this.getApplicationContext());
-        setContentView(maze);
+        zoneDeJeu.addView(maze);
     }
 
-    public class MazeView extends View implements SensorEventListener{
+    public class MazeView extends View implements SensorEventListener {
 
         private int width, height, lineWidth;
         float cellWidth, cellHeight;
@@ -76,10 +90,7 @@ public class MazeGame extends AppCompatActivity {
         private Paint line, red, black, darkgrey, background;
         Context context;
         SensorManager sensorManager;
-        Sensor gyro;
-        boolean firstTilt = true;
-        float[] firstTiltValues;
-
+        Sensor accelerometer;
 
         public MazeView(Context context){
             super(context);
@@ -94,12 +105,14 @@ public class MazeGame extends AppCompatActivity {
             darkgrey.setColor(Color.DKGRAY);
             background = new Paint();
             background.setColor(Color.WHITE);
-            firstTiltValues = new float[2];
             sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
-            gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-            sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_GAME);
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             setFocusable(true);
             this.setFocusableInTouchMode(true);
+
+            chrono.setBase(SystemClock.elapsedRealtime());
+            chrono.start();
         }
 
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -209,37 +222,52 @@ public class MazeGame extends AppCompatActivity {
                 if(currentX==finalPos.first && currentY==finalPos.second)
                     EndGame(true);
 
-                /*for(Pair<Integer,Integer> pos : fakeFinalPos){
+                for(Pair<Integer,Integer> pos : fakeFinalPos){
                     if(currentX == pos.first && currentY == pos.second)
                         EndGame(false);
-                }*/
+                }
 
                 invalidate();
             }
         }
 
         public void EndGame(boolean won){
-            Intent endGame = new Intent(context, GameEnded.class);
-            endGame.putExtra("GameWon", won);
-            startActivity(endGame);
+            final long time = SystemClock.elapsedRealtime() - chrono.getBase();
+            chrono.stop();
+            sensorManager.unregisterListener(this);
+            Intent data = new Intent();
+            if(won && (time<highscore || highscore==0))
+                data.putExtra("highscore",time);
+            else
+                data.putExtra("highscore", 0);
+
+            data.putExtra("flag",flag);
+            setResult(RESULT_OK,data);
+            finish();
         }
 
+        int cmp = 0;
         @Override
         public void onSensorChanged(SensorEvent event) {
-//            if(firstTilt){
-//                firstTilt = false;
-//                firstTiltValues[0] = event.values[0];
-//                firstTiltValues
-//            }
+            //To slow down sensor input (Could be done in registerlistener for API level>18)
+            cmp++;
+            if(cmp == 30) {
+                cmp = 0;
 
-            if(event.values[0]<-2)
-                MoveBall(2);
-            if(event.values[0]>2)
-                MoveBall(4);
-            if(event.values[1]<-2)
-                MoveBall(3);
-            if(event.values[1]>2)
-                MoveBall(1);
+                if (event.values[0] > 3) {
+                    MoveBall(3);
+                }
+                if (event.values[0] < -3) {
+                    MoveBall(1);
+                }
+
+                if (event.values[1] > 3) {
+                    MoveBall(2);
+                }
+                if (event.values[1] < -3) {
+                    MoveBall(4);
+                }
+            }
         }
 
         @Override

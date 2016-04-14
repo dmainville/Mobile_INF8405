@@ -1,10 +1,13 @@
 package ca.polymtl.squatr;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainMenuActivity extends AppCompatActivity {
 
@@ -16,13 +19,24 @@ public class MainMenuActivity extends AppCompatActivity {
 
     String mUsername;
 
+    private SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         // assign views to references and set event listeners
         addViewsAndEventListeners();
-        // TODO: load saved username from file
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mUsername = sharedPref.getString("Username", "");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == 101)
+            mUsername = sharedPref.getString("Username", "");
     }
 
     private void addViewsAndEventListeners()
@@ -31,9 +45,13 @@ public class MainMenuActivity extends AppCompatActivity {
         mGotoMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: prevent action if username is null
-                Intent intent = new Intent(MainMenuActivity.this, MapsActivity.class);
-                startActivity(intent);
+                if(mUsername.isEmpty())
+                    Toast.makeText(getApplicationContext(), "Creer un nom d'utilisateur dans le menu Parametre avant de debuter!", Toast.LENGTH_SHORT).show();
+                else {
+                    Intent intent = new Intent(MainMenuActivity.this, MapsActivity.class);
+                    intent.putExtra("Username", mUsername);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -50,8 +68,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, SettingsActivity.class);
-                startActivity(intent);
-                // TODO: send username in intent (loaded from file)
+                startActivityForResult(intent, 101);
             }
         });
 
