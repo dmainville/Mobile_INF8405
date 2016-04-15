@@ -1,7 +1,9 @@
 package ca.polymtl.squatr;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -77,11 +79,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mProximityListView.setAdapter(mProximityListAdapter);
         mProximityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MapsActivity.this, MazeGame.class);
-                intent.putExtra("flag", mCloseFlags.get(position).title);
-                intent.putExtra("highscore", mCloseFlags.get(position).highscore);
-                startActivityForResult(intent, 1);
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                final AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+                alertDialog.setTitle("Start Game");
+                alertDialog.setMessage("You are about to start the " + mCloseFlags.get(position).game + " are you ready ? ");
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Do nothing
+                    }
+                });
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(mCloseFlags.get(position).game == "maze") {
+                            Intent intent = new Intent(MapsActivity.this, MazeGame.class);
+                            intent.putExtra("flag", mCloseFlags.get(position).title);
+                            intent.putExtra("highscore", mCloseFlags.get(position).highscore);
+                            startActivityForResult(intent, 1);
+                        } else {
+                            Intent intent = new Intent(MapsActivity.this, LightGame.class);
+                            intent.putExtra("flag", mCloseFlags.get(position).title);
+                            intent.putExtra("highscore", mCloseFlags.get(position).highscore);
+                            startActivityForResult(intent, 2);
+                        }
+                    }
+                });
+                alertDialog.show();
             }
         });
     }
@@ -97,7 +121,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     t.show();
                     return;
                 }
-                locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
                 Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
                 t.show();
             } else {
@@ -114,9 +137,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             int highscore = extras.getInt("highscore");
             String flag = extras.getString("flag");
 
-            System.out.println("New highscore = " + highscore + " on flag " + flag);
+            System.out.println("New Maze highscore = " + highscore + " on flag " + flag);
             //if(highscore != 0)
-              //Load new highscore on DB
+              //TODO:Load new highscore on DB (recoit un chiffre autre que 0 si cest le highscore)
+        }
+
+        if(requestCode == 2 && resultCode == RESULT_OK){
+            Bundle extras = data.getExtras();
+            double highscore = extras.getDouble("highscore");
+            String flag = extras.getString("flag");
+
+            System.out.println("New Light highscore = " + highscore + " on flag " + flag);
         }
     }
 
@@ -132,7 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
@@ -160,7 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         }
-        locationManager.requestLocationUpdates(provider, 60000, 100, locationListener);
+        locationManager.requestLocationUpdates(provider, 1000, 0, locationListener);
     }
 
     // This method is called when there is a change in the flags on the database.
@@ -180,21 +212,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String owner = flag.child("owner").getValue(String.class);
             Double latitude = flag.child("coords").child("latitude").getValue(Double.class);
             Double longitude = flag.child("coords").child("longitude").getValue(Double.class);
-            Integer highscore = flag.child("highscore").child("highscore").getValue(Integer.class);
+            Integer highscore = flag.child("highscore").getValue(Integer.class);
+            String game = flag.child("game").getValue(String.class);
+
             if (highscore == null)
             {
                 highscore = 0;
             }
             if (name != null && latitude != null && longitude != null)
             {
-                Flag newFlag = new Flag(latitude, longitude, name, owner, highscore);
+                Flag newFlag = new Flag(latitude, longitude, name, owner, highscore, game);
                 mAllFlags.add(newFlag);
                 addFlagToMap(newFlag);
             }
         }
-
-        //TODO: check proximity and populate close flags list, update array
-        // TODO: or setup alternate solution with clickable markers
     }
 
     private void addFlagToMap(Flag flag)
@@ -225,8 +256,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location flagLoc = new Location("flag");
             flagLoc.setLatitude(flag.latitude);
             flagLoc.setLongitude(flag.longitude);
-            if(location.distanceTo(flagLoc) < 100) {
+            if(location.distanceTo(flagLoc) < 100 && !mCloseFlags.contains(flag)) {
                 mCloseFlags.add(flag);
+            }
+            if(location.distanceTo(flagLoc) > 100 && mCloseFlags.contains(flag)){
+                mCloseFlags.remove(flag);
             }
         }
         // TODO: function to update List (maybe, unless we go for the clickable marker solution

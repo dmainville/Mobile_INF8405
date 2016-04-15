@@ -33,7 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
                 // TODO: save username locally
                 editor = sharedPref.edit();
                 editor.putString("Username", usernameEditText.getText().toString());
-                editor.commit();
+                editor.apply();
                 finish();
             }
         });

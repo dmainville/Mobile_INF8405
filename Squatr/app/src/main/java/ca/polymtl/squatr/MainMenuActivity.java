@@ -84,10 +84,9 @@ public class MainMenuActivity extends AppCompatActivity {
         mPracticeMinigame2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(MainMenuActivity.this, LightGame.class);
+                startActivity(intent);
             }
         });
     }
-
-    // TODO: when returning from preferences, either receive new username or reload it from file
 }

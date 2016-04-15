@@ -251,7 +251,7 @@ public class MazeGame extends AppCompatActivity {
         public void onSensorChanged(SensorEvent event) {
             //To slow down sensor input (Could be done in registerlistener for API level>18)
             cmp++;
-            if(cmp == 30) {
+            if(cmp == 35) {
                 cmp = 0;
 
                 if (event.values[0] > 3) {
