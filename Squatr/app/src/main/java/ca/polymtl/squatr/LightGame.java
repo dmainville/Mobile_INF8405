@@ -104,6 +104,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
     private void EndGame() {
         sensorManager.unregisterListener(this);
+
         Intent data = new Intent();
         if(totalReactionTime<highscore || highscore==0)
             data.putExtra("highscore", totalReactionTime);

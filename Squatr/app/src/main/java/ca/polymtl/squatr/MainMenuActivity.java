@@ -76,7 +76,8 @@ public class MainMenuActivity extends AppCompatActivity {
         mPracticeMinigame1Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(MainMenuActivity.this, MazeGame.class);
+                startActivity(intent);
             }
         });
 

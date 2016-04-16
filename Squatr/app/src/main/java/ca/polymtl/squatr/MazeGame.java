@@ -232,17 +232,20 @@ public class MazeGame extends AppCompatActivity {
         }
 
         public void EndGame(boolean won){
-            final long time = SystemClock.elapsedRealtime() - chrono.getBase();
+            double time = SystemClock.elapsedRealtime() - chrono.getBase();
             chrono.stop();
             sensorManager.unregisterListener(this);
+
             Intent data = new Intent();
-            if(won && (time<highscore || highscore==0))
-                data.putExtra("highscore",time);
+            if(won && (time<highscore || highscore==0)) {
+                data.putExtra("highscore", time);
+                System.out.println("New highscore"+time);
+            }
             else
                 data.putExtra("highscore", 0);
 
-            data.putExtra("flag",flag);
-            setResult(RESULT_OK,data);
+            data.putExtra("flag", flag);
+            setResult(RESULT_OK, data);
             finish();
         }
 

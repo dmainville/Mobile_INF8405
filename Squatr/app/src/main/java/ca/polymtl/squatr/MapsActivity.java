@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -58,18 +59,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
 
         // set this as the firebase context
         Firebase.setAndroidContext(this);
         mFirebaseRef = new Firebase("https://projetinf8405.firebaseio.com/");
 
-        setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // TODO: get the username from previous activity
         Bundle data = getIntent().getExtras();
         mUsername = data.getString("Username");
 
@@ -92,7 +91,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(mCloseFlags.get(position).game == "maze") {
+                        locationManager.removeUpdates(locationListener);
+
+                        if (mCloseFlags.get(position).game.equals("maze")) {
                             Intent intent = new Intent(MapsActivity.this, MazeGame.class);
                             intent.putExtra("flag", mCloseFlags.get(position).title);
                             intent.putExtra("highscore", mCloseFlags.get(position).highscore);
@@ -108,6 +109,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 alertDialog.show();
             }
         });
+
+        Criteria criteria = new Criteria();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(criteria, false);
+        locationListener = new UserLocation();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+            return;
+        }
+        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+        updateProximityList(locationManager.getLastKnownLocation(provider));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+        updateProximityList(locationManager.getLastKnownLocation(provider));
+        // request update from db for flag locations and add change listener
+        mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                reloadAllFlags(snapshot);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+        updateProximityList(locationManager.getLastKnownLocation(provider));
+        // request update from db for flag locations and add change listener
+        mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                reloadAllFlags(snapshot);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -123,6 +195,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
                 t.show();
+                locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+                updateProximityList(locationManager.getLastKnownLocation(provider));
             } else {
                 Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
                 t.show();
@@ -132,22 +206,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            int highscore = extras.getInt("highscore");
-            String flag = extras.getString("flag");
+        if(resultCode == RESULT_OK) {
+            locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
 
-            System.out.println("New Maze highscore = " + highscore + " on flag " + flag);
-            //if(highscore != 0)
-              //TODO:Load new highscore on DB (recoit un chiffre autre que 0 si cest le highscore)
-        }
+            final double highscore = data.getExtras().getDouble("highscore");
+            final String flag = data.getExtras().getString("flag");
+            String game=null, message;
 
-        if(requestCode == 2 && resultCode == RESULT_OK){
-            Bundle extras = data.getExtras();
-            double highscore = extras.getDouble("highscore");
-            String flag = extras.getString("flag");
+            if(requestCode == 1) {
+                game = "Maze Game";
+            }
 
-            System.out.println("New Light highscore = " + highscore + " on flag " + flag);
+            if(requestCode == 2) {
+                game = "Light Game";
+            }
+
+            if(highscore != 0) {
+                message = "Félicitations!! Vous avez battu le meilleur score de " + game + "! Vous avez maintenant ce drapeau : " + flag;
+
+                mFirebaseRef.child("flags").child(flag).child("owner").setValue(mUsername);
+                mFirebaseRef.child("flags").child(flag).child("highscore").setValue(highscore);
+            }
+            else
+                message = "Vous n'avez pas battu le meilleur score. Meilleur chance la prochaine fois!";
+
+            final AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+            alertDialog.setMessage(message);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Continuer", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    updateProximityList(locationManager.getLastKnownLocation(provider));
+                }
+            });
+            alertDialog.show();
         }
     }
 
@@ -169,9 +260,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         mMap.setMyLocationEnabled(true);
 
-        // TODO: move to current location
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng();
-
         // request update from db for flag locations and add change listener
         mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
             @Override
@@ -183,16 +271,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCancelled(FirebaseError error) {
             }
         });
-
-        Criteria criteria = new Criteria();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        provider = locationManager.getBestProvider(criteria, false);
-        locationListener = new UserLocation();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
-        }
-        locationManager.requestLocationUpdates(provider, 1000, 0, locationListener);
     }
 
     // This method is called when there is a change in the flags on the database.
@@ -244,31 +322,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
         mMap.addMarker(markerOptions);
-
     }
-
-    // TODO: function to detect which coords are in proximity
-    // TODO: or function to check if coord in param is close enough to us
 
     private void updateProximityList(Location location)
     {
+        mCloseFlags.clear();
         for(Flag flag : mAllFlags){
             Location flagLoc = new Location("flag");
             flagLoc.setLatitude(flag.latitude);
             flagLoc.setLongitude(flag.longitude);
-            if(location.distanceTo(flagLoc) < 100 && !mCloseFlags.contains(flag)) {
+            System.out.println("Distance to flag "+flag.title+" : "+location.distanceTo(flagLoc));
+            if(location.distanceTo(flagLoc) < 500 && !mCloseFlags.contains(flag)) {
                 mCloseFlags.add(flag);
             }
-            if(location.distanceTo(flagLoc) > 100 && mCloseFlags.contains(flag)){
-                mCloseFlags.remove(flag);
-            }
         }
-        // TODO: function to update List (maybe, unless we go for the clickable marker solution
+        mProximityListAdapter.notifyDataSetChanged();
     }
-
-    // TODO: function to launch one of two games randomly if in proximity
-
-    // TODO: function to treat return value from minigame (compare with high score and upload data if won)
 
     private class UserLocation implements LocationListener{
         private boolean firstUpdate = true;
