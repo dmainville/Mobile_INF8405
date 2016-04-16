@@ -11,11 +11,11 @@ import android.widget.Toast;
 
 public class MainMenuActivity extends AppCompatActivity {
 
-    Button mGotoMapButton;
-    Button mLeaderboardButton;
-    Button mSettingsButton;
-    Button mPracticeMinigame1Button;
-    Button mPracticeMinigame2Button;
+    private Button mGotoMapButton;
+    private Button mLeaderboardButton;
+    private Button mSettingsButton;
+    private Button mPracticeMinigame1Button;
+    private Button mPracticeMinigame2Button;
 
     String mUsername;
 
@@ -59,7 +59,9 @@ public class MainMenuActivity extends AppCompatActivity {
         mLeaderboardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(MainMenuActivity.this, LeaderboardActivity.class);
+                intent.putExtra("Username", mUsername);
+                startActivity(intent);
             }
         });
 
@@ -77,6 +79,8 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, MazeGame.class);
+                intent.putExtra("flag", "Pratique");
+                intent.putExtra("highscore", 0);
                 startActivity(intent);
             }
         });
@@ -86,6 +90,8 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, LightGame.class);
+                intent.putExtra("flag", "Pratique");
+                intent.putExtra("highscore", 0);
                 startActivity(intent);
             }
         });

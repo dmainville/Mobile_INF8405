@@ -13,7 +13,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -45,15 +44,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String mUsername = "";
 
     // All the flags on the map, fetched from the server
-    private ArrayList<Flag> mAllFlags = new ArrayList<>();
+    private final ArrayList<Flag> mAllFlags = new ArrayList<>();
 
     // These attributes will deal with the list of flags that are within capturable distance.
-    private ListView mProximityListView;
     private ArrayAdapter mProximityListAdapter;
-    private ArrayList<Flag> mCloseFlags = new ArrayList<>();
+    private final ArrayList<Flag> mCloseFlags = new ArrayList<>();
 
     // The reference to the Firebase db root
-    Firebase mFirebaseRef;
+    private Firebase mFirebaseRef;
 
 
     @Override
@@ -69,12 +67,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // et username from Intent
         Bundle data = getIntent().getExtras();
         mUsername = data.getString("Username");
 
         // Setup the proximity list view with the adapter
+        //noinspection unchecked
         mProximityListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, mCloseFlags);
-        mProximityListView = (ListView) findViewById(R.id.proximityListView);
+
+        ListView mProximityListView = (ListView) findViewById(R.id.proximityListView);
         mProximityListView.setAdapter(mProximityListAdapter);
         mProximityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -85,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //Do nothing
+                        // Do nothing
                     }
                 });
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes!", new DialogInterface.OnClickListener() {
@@ -94,11 +95,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         locationManager.removeUpdates(locationListener);
 
                         if (mCloseFlags.get(position).game.equals("maze")) {
+                            // Start Maze Game
                             Intent intent = new Intent(MapsActivity.this, MazeGame.class);
                             intent.putExtra("flag", mCloseFlags.get(position).title);
                             intent.putExtra("highscore", mCloseFlags.get(position).highscore);
                             startActivityForResult(intent, 1);
                         } else {
+                            // Start light game
                             Intent intent = new Intent(MapsActivity.this, LightGame.class);
                             intent.putExtra("flag", mCloseFlags.get(position).title);
                             intent.putExtra("highscore", mCloseFlags.get(position).highscore);
@@ -110,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        // Start location listener
         Criteria criteria = new Criteria();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(criteria, false);
@@ -126,6 +130,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStart() {
         super.onStart();
+        // Start location listener
         locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
         updateProximityList(locationManager.getLastKnownLocation(provider));
         // request update from db for flag locations and add change listener
@@ -144,7 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-
+        // Start location listener
         locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
         updateProximityList(locationManager.getLastKnownLocation(provider));
         // request update from db for flag locations and add change listener
@@ -163,27 +168,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStop() {
         super.onStop();
+        // Stop location listener
         locationManager.removeUpdates(locationListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Stop location listener
         locationManager.removeUpdates(locationListener);
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if ((keyCode == KeyEvent.KEYCODE_BACK))
-        {
-            finish();
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        // To activate location service (if they are disabled)
         if (requestCode == 0) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -195,6 +193,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
                 t.show();
+                // Start location listener
                 locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
                 updateProximityList(locationManager.getLastKnownLocation(provider));
             } else {
@@ -204,12 +203,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // Call when games end
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
+            // Start location listener
             locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
 
+            // Retrieve highscore (0 if no highscore)
             final double highscore = data.getExtras().getDouble("highscore");
+            // Retrieve flag name
             final String flag = data.getExtras().getString("flag");
             String game=null, message;
 
@@ -221,15 +224,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 game = "Light Game";
             }
 
+            // Set highscore on database
             if(highscore != 0) {
                 message = "Félicitations!! Vous avez battu le meilleur score de " + game + "! Vous avez maintenant ce drapeau : " + flag;
 
-                mFirebaseRef.child("flags").child(flag).child("owner").setValue(mUsername);
-                mFirebaseRef.child("flags").child(flag).child("highscore").setValue(highscore);
+                if(flag != null) {
+                    mFirebaseRef.child("flags").child(flag).child("owner").setValue(mUsername);
+                    mFirebaseRef.child("flags").child(flag).child("highscore").setValue(highscore);
+                }
             }
             else
                 message = "Vous n'avez pas battu le meilleur score. Meilleur chance la prochaine fois!";
 
+            // Show user message after game
             final AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
             alertDialog.setMessage(message);
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Continuer", new DialogInterface.OnClickListener() {
@@ -275,7 +282,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // This method is called when there is a change in the flags on the database.
     // It should also be called during initialization, to fetch all the flags
-    void reloadAllFlags(DataSnapshot snapshot)
+    private void reloadAllFlags(DataSnapshot snapshot)
     {
         // clear local array
         mAllFlags.clear();
@@ -326,30 +333,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateProximityList(Location location)
     {
+        // Retrieve flag from list
         mCloseFlags.clear();
         for(Flag flag : mAllFlags){
             Location flagLoc = new Location("flag");
             flagLoc.setLatitude(flag.latitude);
             flagLoc.setLongitude(flag.longitude);
-            System.out.println("Distance to flag "+flag.title+" : "+location.distanceTo(flagLoc));
+            // Add flag to close flags list
             if(location.distanceTo(flagLoc) < 500 && !mCloseFlags.contains(flag)) {
                 mCloseFlags.add(flag);
             }
         }
+        // Notify adapter
         mProximityListAdapter.notifyDataSetChanged();
     }
 
     private class UserLocation implements LocationListener{
+        // To move camera
         private boolean firstUpdate = true;
 
         @Override
         public void onLocationChanged(Location location) {
             if(firstUpdate){
                 firstUpdate = false;
+                // Move camera on first update
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(),location.getLongitude())));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
             }
 
+            // Update list of close flag
             updateProximityList(location);
         }
 

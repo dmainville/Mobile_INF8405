@@ -24,8 +24,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
     private String flag;
 
     private SensorManager sensorManager;
-    private Sensor sensor;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     private TextView intensiteTextView;
     private TextView totalReactionTimeTextView;
@@ -44,7 +43,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         totalReactionTimeTextView = (TextView) findViewById(R.id.totalReactionTimeTextView);
 
         sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         reactionTime = (Chronometer) findViewById(R.id.chrono);
         totalReactionTime = 0;
@@ -56,7 +55,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         task.execute();
     }
 
-    float lastValue;
+    private float lastValue;
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(lightOn && !waiting && event.values[0] > 2){
@@ -121,7 +120,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
     }
 
-    public class Task extends AsyncTask<Void, Void, Void> {
+    private class Task extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {

@@ -21,13 +21,12 @@ public class MazeGame extends AppCompatActivity {
 
     private int highscore;
     private String flag;
-    private GridLayout zoneDeJeu;
-    Chronometer chrono;
+    private Chronometer chrono;
     private int[][] mazeMapVertical;
     private int[][] mazeMapHorizontal;
     private int currentX, currentY;
     private Pair<Integer, Integer> mapSize;
-    private Pair<Integer, Integer> finalPos = new Pair<>(7,7);
+    private final Pair<Integer, Integer> finalPos = new Pair<>(7,7);
     private Pair<Integer, Integer>[] fakeFinalPos;
 
     @Override
@@ -39,7 +38,7 @@ public class MazeGame extends AppCompatActivity {
         highscore = data.getInt("highscore");
         flag = data.getString("flag");
 
-        zoneDeJeu = (GridLayout) findViewById(R.id.zoneDeJeu);
+        GridLayout zoneDeJeu = (GridLayout) findViewById(R.id.zoneDeJeu);
         chrono = (Chronometer) findViewById(R.id.chronometer);
 
         mazeMapVertical = new int[][]{
@@ -63,6 +62,7 @@ public class MazeGame extends AppCompatActivity {
         };
 
         mapSize = new Pair<>(8,8);
+        //noinspection unchecked
         fakeFinalPos = new Pair[]{
                 new Pair(4,0),
                 new Pair(7,0),
@@ -79,7 +79,8 @@ public class MazeGame extends AppCompatActivity {
                 new Pair(3,7)
         };
         MazeView maze = new MazeView(this.getApplicationContext());
-        zoneDeJeu.addView(maze);
+        if(zoneDeJeu != null)
+            zoneDeJeu.addView(maze);
     }
 
     public class MazeView extends View implements SensorEventListener {
@@ -87,10 +88,10 @@ public class MazeGame extends AppCompatActivity {
         private int width, height, lineWidth;
         float cellWidth, cellHeight;
         float totalCellWidth, totalCellHeight;
-        private Paint line, red, black, darkgrey, background;
-        Context context;
-        SensorManager sensorManager;
-        Sensor accelerometer;
+        private final Paint line, red, black, darkgrey, background;
+        final Context context;
+        final SensorManager sensorManager;
+        final Sensor accelerometer;
 
         public MazeView(Context context){
             super(context);
@@ -254,7 +255,7 @@ public class MazeGame extends AppCompatActivity {
         public void onSensorChanged(SensorEvent event) {
             //To slow down sensor input (Could be done in registerlistener for API level>18)
             cmp++;
-            if(cmp == 35) {
+            if(cmp == 30) {
                 cmp = 0;
 
                 if (event.values[0] > 3) {

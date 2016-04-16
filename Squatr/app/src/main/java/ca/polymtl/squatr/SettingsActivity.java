@@ -10,8 +10,8 @@ import android.widget.EditText;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    Button mSaveButton;
-    EditText usernameEditText;
+    private Button mSaveButton;
+    private EditText usernameEditText;
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
 

@@ -11,4 +11,7 @@
     <string name="usernameTextView">Nom d\'utilisateur: </string>
     <string name="flagsInProximityTextView">Drapeaux accessibles: </string>
     <string name="title_activity_maps">Carte</string>
+    <string name="distancetoflag">Distance jusqu\'au drapeau : </string>
+    <string name="leaderboardlist">Liste des Gagnants : </string>
+    <string name="light">Lumière : </string>
 </resources>

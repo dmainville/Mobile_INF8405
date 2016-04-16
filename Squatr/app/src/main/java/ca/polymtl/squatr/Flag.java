@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 /// Describes a flag, i.e. a capturable location on the map
 public class Flag implements Serializable{
-    public double latitude;
-    public double longitude;
-    public String title;
-    public String owner;
-    public int highscore;
-    public String game;
+    public final double latitude;
+    public final double longitude;
+    public final String title;
+    public final String owner;
+    public final int highscore;
+    public final String game;
 
     public Flag(double latitude, double longitude, String title, String owner, int highscore, String game)
     {
