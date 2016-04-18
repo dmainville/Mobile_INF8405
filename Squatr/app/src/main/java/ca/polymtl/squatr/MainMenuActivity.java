@@ -1,12 +1,17 @@
 package ca.polymtl.squatr;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainMenuActivity extends AppCompatActivity {
@@ -16,10 +21,13 @@ public class MainMenuActivity extends AppCompatActivity {
     private Button mSettingsButton;
     private Button mPracticeMinigame1Button;
     private Button mPracticeMinigame2Button;
+    private TextView mTbBatterie;
 
     String mUsername;
 
     private SharedPreferences sharedPref;
+
+    private int initialBatterieLevel = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +37,31 @@ public class MainMenuActivity extends AppCompatActivity {
         addViewsAndEventListeners();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mUsername = sharedPref.getString("Username", "");
+
+        //Écouté le changement de niveau de batterie
+        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
     }
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+
+            //Récupérer le niveau actuel de la batterie
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            System.out.println("BATTERIE : "+level);
+
+            if(initialBatterieLevel == -1)
+                initialBatterieLevel = level;
+
+            int consommation  = initialBatterieLevel-level;
+            //Consommation de batterie : 0%
+
+            //Afficher la différence avec le niveau initial
+            mTbBatterie.setText("Consommation de batterie : "+consommation+"%");
+        }
+    };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
