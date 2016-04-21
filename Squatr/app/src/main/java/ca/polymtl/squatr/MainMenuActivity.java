@@ -23,11 +23,11 @@ public class MainMenuActivity extends AppCompatActivity {
     private Button mPracticeMinigame2Button;
     private TextView mTbBatterie;
 
+    private int initialBatterieLevel = -1;
+
     String mUsername;
 
     private SharedPreferences sharedPref;
-
-    private int initialBatterieLevel = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +44,20 @@ public class MainMenuActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            this.unregisterReceiver(this.mBatInfoReceiver);
+        } catch(Exception e){ }
+    }
+
     private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context ctxt, Intent intent) {
 
             //Récupérer le niveau actuel de la batterie
             int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            System.out.println("BATTERIE : "+level);
 
             if(initialBatterieLevel == -1)
                 initialBatterieLevel = level;
@@ -82,6 +89,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 else {
                     Intent intent = new Intent(MainMenuActivity.this, MapsActivity.class);
                     intent.putExtra("Username", mUsername);
+                    intent.putExtra("Battery", initialBatterieLevel);
                     startActivity(intent);
                 }
             }
@@ -93,6 +101,7 @@ public class MainMenuActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, LeaderboardActivity.class);
                 intent.putExtra("Username", mUsername);
+                intent.putExtra("Battery", initialBatterieLevel);
                 startActivity(intent);
             }
         });
@@ -102,6 +111,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, SettingsActivity.class);
+                intent.putExtra("Battery", initialBatterieLevel);
                 startActivityForResult(intent, 101);
             }
         });
@@ -113,6 +123,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainMenuActivity.this, MazeGame.class);
                 intent.putExtra("flag", "Pratique");
                 intent.putExtra("highscore", 0);
+                intent.putExtra("Battery", initialBatterieLevel);
                 startActivity(intent);
             }
         });
@@ -124,6 +135,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainMenuActivity.this, LightGame.class);
                 intent.putExtra("flag", "Pratique");
                 intent.putExtra("highscore", 0);
+                intent.putExtra("Battery", initialBatterieLevel);
                 startActivity(intent);
             }
         });

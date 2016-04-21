@@ -1,11 +1,15 @@
 package ca.polymtl.squatr;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +29,12 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
     private SensorManager sensorManager;
     private final Random random = new Random();
+    private int initialBatterieLevel = -1;
 
     private TextView intensiteTextView;
     private TextView totalReactionTimeTextView;
     private Chronometer reactionTime;
+    private TextView mTbBatterie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         Bundle data = getIntent().getExtras();
         highscore = data.getInt("highscore");
         flag = data.getString("flag");
+        initialBatterieLevel = data.getInt("Battery");
 
         intensiteTextView = (TextView) findViewById(R.id.intensiteTextView);
         totalReactionTimeTextView = (TextView) findViewById(R.id.totalReactionTimeTextView);
@@ -53,7 +60,37 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         intensiteTextView.setText("Attender la prochaine instruction! (Dévoiler la caméra avant en l'attendant!");
         Task task = new Task();
         task.execute();
+
+        //Écouté le changement de niveau de batterie
+        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
     }
+
+    @Override
+    protected void onStop() {
+        try {
+            this.unregisterReceiver(this.mBatInfoReceiver);
+        } catch(Exception e){ }
+        super.onStop();
+    }
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+
+            //Récupérer le niveau actuel de la batterie
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+
+            if(initialBatterieLevel == -1)
+                initialBatterieLevel = level;
+
+            int consommation  = initialBatterieLevel-level;
+            //Consommation de batterie : 0%
+
+            //Afficher la différence avec le niveau initial
+            mTbBatterie.setText("Batterie : "+consommation+"%");
+        }
+    };
 
     private float lastValue;
     @Override

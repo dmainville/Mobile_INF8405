@@ -25,7 +25,17 @@
         android:id="@+id/distanceToFlagTextView"
         android:textSize="25sp"
         android:layout_above="@+id/linearLayout"
-        android:layout_centerHorizontal="true" />
+        android:layout_toEndOf="@+id/textView"
+        android:layout_marginStart="272dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/lblBatterie"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="bottom" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -47,7 +57,7 @@
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="501dp"
             tools:context="ca.polymtl.squatr.MapsActivity"
             android:layout_marginTop="55dp" />
 

@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/zoneDeJeu" >
+        android:id="@+id/zoneDeJeu"
+        android:layout_toStartOf="@+id/lblBatterie">
     </GridLayout>
 
     <Chronometer
@@ -22,9 +22,18 @@
         android:layout_height="wrap_content"
         android:id="@+id/chronometer"
         android:textSize="15sp"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:enabled="true"
         android:visibility="visible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/lblBatterie"
+        android:text="Batterie : 0%"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/chronometer" />
 
 </RelativeLayout>

@@ -2,14 +2,17 @@ package ca.polymtl.squatr;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -17,12 +20,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,12 +40,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
     private String provider;
     private LocationManager locationManager;
     private UserLocation locationListener;
+    private Location lastKnownLocation;
+    private TextView mTbBatterie;
+    private int initialBatterieLevel = -1;
 
     // Our username, passed from previous activity
     private String mUsername = "";
@@ -63,6 +74,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Firebase.setAndroidContext(this);
         mFirebaseRef = new Firebase("https://projetinf8405.firebaseio.com/");
 
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+        mGoogleApiClient.connect();
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -70,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // et username from Intent
         Bundle data = getIntent().getExtras();
         mUsername = data.getString("Username");
+        initialBatterieLevel = data.getInt("Battery");
 
         // Setup the proximity list view with the adapter
         //noinspection unchecked
@@ -123,16 +146,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
             return;
         }
-        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-        updateProximityList(locationManager.getLastKnownLocation(provider));
+        locationManager.requestLocationUpdates(provider, 1000, 0, locationListener);
+
+        //Écouté le changement de niveau de batterie
+        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
     }
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+
+            //Récupérer le niveau actuel de la batterie
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+
+            if(initialBatterieLevel == -1)
+                initialBatterieLevel = level;
+
+            int consommation  = initialBatterieLevel-level;
+            //Consommation de batterie : 0%
+
+            //Afficher la différence avec le niveau initial
+            mTbBatterie.setText("Batterie : "+consommation+"%");
+        }
+    };
 
     @Override
     protected void onStart() {
         super.onStart();
         // Start location listener
+        mGoogleApiClient.connect();
         locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-        updateProximityList(locationManager.getLastKnownLocation(provider));
         // request update from db for flag locations and add change listener
         mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
             @Override
@@ -168,8 +213,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStop() {
         super.onStop();
-        // Stop location listener
+        // Stop listener
+        try {
+            this.unregisterReceiver(this.mBatInfoReceiver);
+        } catch(Exception e){ }
+
         locationManager.removeUpdates(locationListener);
+
+        if(mGoogleApiClient.isConnected())
+            mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -311,6 +363,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 addFlagToMap(newFlag);
             }
         }
+        updateProximityList(lastKnownLocation);
     }
 
     private void addFlagToMap(Flag flag)
@@ -333,25 +386,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateProximityList(Location location)
     {
-        // Retrieve flag from list
-        mCloseFlags.clear();
-        for(Flag flag : mAllFlags){
-            Location flagLoc = new Location("flag");
-            flagLoc.setLatitude(flag.latitude);
-            flagLoc.setLongitude(flag.longitude);
-            // Add flag to close flags list
-            if(location.distanceTo(flagLoc) < 500 && !mCloseFlags.contains(flag)) {
-                mCloseFlags.add(flag);
+        if(location != null) {
+            // Retrieve flag from list
+            mCloseFlags.clear();
+            for (Flag flag : mAllFlags) {
+                Location flagLoc = new Location("flag");
+                flagLoc.setLatitude(flag.latitude);
+                flagLoc.setLongitude(flag.longitude);
+                // Add flag to close flags list
+                if (location.distanceTo(flagLoc) < 500 && !mCloseFlags.contains(flag)) {
+                    mCloseFlags.add(flag);
+                }
             }
+            // Notify adapter
+            mProximityListAdapter.notifyDataSetChanged();
         }
-        // Notify adapter
-        mProximityListAdapter.notifyDataSetChanged();
     }
 
-    private class UserLocation implements LocationListener{
-        // To move camera
-        private boolean firstUpdate = true;
+    @Override
+    public void onConnected(Bundle bundle) {
+        lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude())));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        firstUpdate = false;
+        updateProximityList(lastKnownLocation);
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {   }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {   }
+
+    // To move camera
+    private boolean firstUpdate = true;
+
+    private class UserLocation implements LocationListener{
         @Override
         public void onLocationChanged(Location location) {
             if(firstUpdate){
