@@ -49,8 +49,10 @@
             android:name=".MazeGame"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape" />
-        <activity android:name=".LightGame" />
-        <activity android:name=".LeaderboardActivity"/>
+        <activity android:name=".LightGame"
+            android:screenOrientation="landscape" />
+        <activity android:name=".LeaderboardActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
