@@ -18,6 +18,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
     private Button mGotoMapButton;
     private Button mLeaderboardButton;
+    private Button mFlagMapButton;
     private Button mSettingsButton;
     private Button mPracticeMinigame1Button;
     private Button mPracticeMinigame2Button;
@@ -100,6 +101,17 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, LeaderboardActivity.class);
+                intent.putExtra("Username", mUsername);
+                intent.putExtra("Battery", initialBatterieLevel);
+                startActivity(intent);
+            }
+        });
+
+        mFlagMapButton = (Button) findViewById(R.id.flagMapButton);
+        mFlagMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, FlagMapActivity.class);
                 intent.putExtra("Username", mUsername);
                 intent.putExtra("Battery", initialBatterieLevel);
                 startActivity(intent);

@@ -28,6 +28,14 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Carte des Drapeaux"
+        android:id="@+id/flagMapButton"
+        android:layout_below="@+id/leaderboardButton"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/settingButton"
         android:id="@+id/settingsButton"
         android:layout_centerVertical="true"

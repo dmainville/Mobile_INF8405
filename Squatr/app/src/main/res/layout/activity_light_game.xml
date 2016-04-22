@@ -17,7 +17,7 @@
         android:textSize="35sp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/textView" />
+        android:id="@+id/WinningList" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         android:layout_marginTop="75dp"
         android:textSize="35sp"
         android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
+        android:layout_below="@+id/WinningList"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -42,8 +42,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/intensiteTextView"
-        android:layout_alignTop="@+id/textView"
-        android:layout_toEndOf="@+id/textView"
+        android:layout_alignTop="@+id/WinningList"
+        android:layout_toEndOf="@+id/WinningList"
         android:layout_marginStart="51dp"
         android:textSize="35sp"
         android:text="Attender la prochaine instruction!" />

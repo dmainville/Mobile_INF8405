@@ -1,18 +1,13 @@
 package ca.polymtl.squatr;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.BatteryManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -21,29 +16,31 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class LeaderboardActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class LeaderboardActivity extends AppCompatActivity {
 
+    private ArrayList<Flag> mFlagList;
+
+    private HashMap<String, Integer> mLeaderboardHashMap;
+    private ArrayList<Pair> mLeaderboardArray;
     private ArrayAdapter mLeaderboardListAdapter;
-    private ArrayList<Flag> mLeaderboardArray;
+    private ListView mLeaderboardListView;
+
+    private HashMap<String, Integer> mLeaderboardMazeHashMap;
+    private ArrayList<Pair> mLeaderboardMazeArray;
+    private ArrayAdapter mLeaderboardMazeListAdapter;
+    private ListView mLeaderboardMazeListView;
+
+    private HashMap<String, Integer> mLeaderboardLightHashMap;
+    private ArrayList<Pair> mLeaderboardLightArray;
+    private ArrayAdapter mLeaderboardLightListAdapter;
+    private ListView mLeaderboardLightListView;
+
     private String mUsername;
-    private GoogleMap mMap;
     private Firebase mFirebaseRef;
-    private TextView distanceToFlagTextView;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
     private TextView mTbBatterie;
     private int initialBatterieLevel = -1;
 
@@ -51,39 +48,36 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
-        distanceToFlagTextView = (TextView) findViewById(R.id.distanceToFlagTextView);
 
         Bundle data = getIntent().getExtras();
         mUsername = data.getString("Username");
         initialBatterieLevel = data.getInt("Battery");
 
+        mFlagList = new ArrayList<>();
+        SetListViews();
+
         Firebase.setAndroidContext(this);
         mFirebaseRef = new Firebase("https://projetinf8405.firebaseio.com/");
+        // request update from db for flag locations and add change listener
+
+        mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                LoadAllFlag(snapshot);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError error) {
+            }
+        });
 
         //Écouté le changement de niveau de batterie
         mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
         this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-
-        mGoogleApiClient.connect();
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
     }
 
     @Override
     protected void onStop() {
-        if(mGoogleApiClient.isConnected())
-            mGoogleApiClient.disconnect();
-
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
         } catch(Exception e){ }
@@ -92,7 +86,7 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         super.onStart();
     }
 
@@ -114,52 +108,25 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
         }
     };
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        ListView mLeaderboardListView;
-        mMap = googleMap;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
-
+    private void SetListViews(){
         mLeaderboardArray = new ArrayList<>();
-
         mLeaderboardListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, mLeaderboardArray);
         mLeaderboardListView = (ListView) findViewById(R.id.leaderboardListView);
         mLeaderboardListView.setAdapter(mLeaderboardListAdapter);
-        mLeaderboardListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Location flagLoc = new Location(mLeaderboardArray.get(position).title);
-                flagLoc.setLatitude(mLeaderboardArray.get(position).latitude);
-                flagLoc.setLongitude(mLeaderboardArray.get(position).longitude);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(flagLoc.getLatitude(), flagLoc.getLongitude())));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
-                if(mLastLocation!=null) {
-                    distanceToFlagTextView.setText("Distance to " + flagLoc.getProvider() + " : " + String.format("%.2f", mLastLocation.distanceTo(flagLoc)) + " m");
-                }
-            }
-        });
+        mLeaderboardMazeArray = new ArrayList<>();
+        mLeaderboardMazeListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, mLeaderboardMazeArray);
+        mLeaderboardMazeListView = (ListView) findViewById(R.id.leaderboardMazeListView);
+        mLeaderboardMazeListView.setAdapter(mLeaderboardMazeListAdapter);
 
-        // request update from db for flag locations and add change listener
-        mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                LoadAllFlag(snapshot);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError error) {
-            }
-        });
+        mLeaderboardLightArray = new ArrayList<>();
+        mLeaderboardLightListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, mLeaderboardLightArray);
+        mLeaderboardLightListView = (ListView) findViewById(R.id.leaderboardLightListView);
+        mLeaderboardLightListView.setAdapter(mLeaderboardLightListAdapter);
     }
 
     private void LoadAllFlag(DataSnapshot snapshot) {
-        mLeaderboardArray.clear();
+        mFlagList.clear();
 
         // Add each child to our local array
         for (DataSnapshot flag : snapshot.getChildren())
@@ -178,40 +145,122 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
             if (name != null && latitude != null && longitude != null)
             {
                 Flag newFlag = new Flag(latitude, longitude, name, owner, highscore, game);
-                mLeaderboardArray.add(newFlag);
-                AddFlagToMap(newFlag);
+                mFlagList.add(newFlag);
             }
         }
+        SortLeaderboard();
+    }
+
+    private void SortLeaderboard() {
+        if(mLeaderboardHashMap == null)
+            mLeaderboardHashMap = new HashMap<>();
+        else {
+            mLeaderboardArray.clear();
+            mLeaderboardHashMap.clear();
+        }
+
+        if(mLeaderboardMazeHashMap == null)
+            mLeaderboardMazeHashMap = new HashMap<>();
+        else {
+            mLeaderboardMazeArray.clear();
+            mLeaderboardMazeHashMap.clear();
+        }
+
+        if(mLeaderboardLightHashMap == null)
+            mLeaderboardLightHashMap = new HashMap<>();
+        else {
+            mLeaderboardLightArray.clear();
+            mLeaderboardLightHashMap.clear();
+        }
+
+        for(Flag flag : mFlagList){
+            if (mLeaderboardHashMap.containsKey(flag.owner))
+                mLeaderboardHashMap.put(flag.owner, mLeaderboardHashMap.get(flag.owner)+1);
+            else
+                mLeaderboardHashMap.put(flag.owner,1);
+
+            if(flag.game.equals("maze")) {
+                if (mLeaderboardMazeHashMap.containsKey(flag.owner))
+                    mLeaderboardMazeHashMap.put(flag.owner, mLeaderboardMazeHashMap.get(flag.owner) + 1);
+                else
+                    mLeaderboardMazeHashMap.put(flag.owner, 1);
+            }
+
+            if(flag.game.equals("light")){
+                if (mLeaderboardLightHashMap.containsKey(flag.owner))
+                    mLeaderboardLightHashMap.put(flag.owner, mLeaderboardLightHashMap.get(flag.owner) + 1);
+                else
+                    mLeaderboardLightHashMap.put(flag.owner, 1);
+            }
+        }
+
+        for(String name : mLeaderboardHashMap.keySet())
+        {
+            if(mLeaderboardArray.isEmpty())
+                mLeaderboardArray.add(new Pair(name, mLeaderboardHashMap.get(name)));
+            else{
+                boolean insert = false;
+                for(int i = 0; i < mLeaderboardArray.size() && !insert; i++){
+                    if(mLeaderboardHashMap.get(name) > mLeaderboardArray.get(i).second) {
+                        mLeaderboardArray.add(i, new Pair(name, mLeaderboardHashMap.get(name)));
+                        insert = true;
+                    }
+                }
+                if(!insert)
+                    mLeaderboardArray.add(new Pair(name,mLeaderboardHashMap.get(name)));
+            }
+        }
+
+        for(String name : mLeaderboardMazeHashMap.keySet())
+        {
+            if(mLeaderboardMazeArray.isEmpty())
+                mLeaderboardMazeArray.add(new Pair(name, mLeaderboardMazeHashMap.get(name)));
+            else{
+                boolean insert = false;
+                for(int i = 0; i < mLeaderboardMazeArray.size() && !insert; i++){
+                    if(mLeaderboardMazeHashMap.get(name) > mLeaderboardMazeArray.get(i).second) {
+                        mLeaderboardMazeArray.add(i, new Pair(name, mLeaderboardMazeHashMap.get(name)));
+                        insert = true;
+                    }
+                }
+                if(!insert)
+                    mLeaderboardMazeArray.add(new Pair(name,mLeaderboardMazeHashMap.get(name)));
+            }
+        }
+
+        for(String name : mLeaderboardLightHashMap.keySet())
+        {
+            if(mLeaderboardLightArray.isEmpty())
+                mLeaderboardLightArray.add(new Pair(name, mLeaderboardLightHashMap.get(name)));
+            else{
+                boolean insert = false;
+                for(int i = 0; i < mLeaderboardLightArray.size() && !insert; i++){
+                    if(mLeaderboardLightHashMap.get(name) > mLeaderboardLightArray.get(i).second) {
+                        mLeaderboardLightArray.add(i, new Pair(name, mLeaderboardLightHashMap.get(name)));
+                        insert = true;
+                    }
+                }
+                if(!insert)
+                    mLeaderboardLightArray.add(new Pair(name,mLeaderboardLightHashMap.get(name)));
+            }
+        }
+
         mLeaderboardListAdapter.notifyDataSetChanged();
+        mLeaderboardMazeListAdapter.notifyDataSetChanged();
+        mLeaderboardLightListAdapter.notifyDataSetChanged();
     }
 
-    private void AddFlagToMap(Flag flag){
-        LatLng coords = new LatLng(flag.latitude, flag.longitude);
-        MarkerOptions markerOptions = new MarkerOptions().position(coords).title(flag.title).draggable(false);
-        if (flag.owner != null) {
-            markerOptions.snippet(flag.owner);
+    public class Pair{
+        String first;
+        Integer second;
+
+        Pair(String s, Integer i){
+            first = s;
+            second = i;
         }
-        // if we are the owner, we put the marker as green, else we put it red
-        if (flag.owner != null && !flag.owner.equals("") && flag.owner.equals(mUsername)) {
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        } else {
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+        public String toString(){
+            return first + " - " + second.toString();
         }
-        mMap.addMarker(markerOptions);
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
     }
 }
