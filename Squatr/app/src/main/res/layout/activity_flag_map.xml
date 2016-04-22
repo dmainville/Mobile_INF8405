@@ -34,7 +34,7 @@
         android:id="@+id/lblBatterie"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_gravity="bottom" />
+        android:layout_gravity="left|bottom" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -43,7 +43,8 @@
         android:layout_below="@+id/WinningList"
         android:layout_alignParentStart="true"
         android:id="@+id/linearLayout"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:layout_above="@+id/lblBatterie">
 
         <ListView
             android:layout_width="200sp"
@@ -55,12 +56,13 @@
         <fragment
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="653dp"
+            android:layout_height="fill_parent"
             android:id="@+id/flag_map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_weight="0.98"
-            tools:context="ca.polymtl.squatr.FlagMapActivity" />
+            tools:context="ca.polymtl.squatr.FlagMapActivity"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1" />
 
     </LinearLayout>
 
