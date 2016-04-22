@@ -6,13 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -36,11 +33,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class LeaderboardActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private ListView mLeaderboardListView;
     private ArrayAdapter mLeaderboardListAdapter;
     private ArrayList<Flag> mLeaderboardArray;
     private String mUsername;
@@ -51,22 +46,6 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
     private Location mLastLocation;
     private TextView mTbBatterie;
     private int initialBatterieLevel = -1;
-
-    @Override
-    protected void onStop() {
-        if(mGoogleApiClient.isConnected())
-            mGoogleApiClient.disconnect();
-        try {
-            this.unregisterReceiver(this.mBatInfoReceiver);
-        } catch(Exception e){ }
-        super.onStop();
-    }
-
-    @Override
-    protected void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +60,10 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
         Firebase.setAndroidContext(this);
         mFirebaseRef = new Firebase("https://projetinf8405.firebaseio.com/");
 
+        //Écouté le changement de niveau de batterie
+        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -94,11 +77,23 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
 
-        //Écouté le changement de niveau de batterie
-        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
-        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    @Override
+    protected void onStop() {
+        if(mGoogleApiClient.isConnected())
+            mGoogleApiClient.disconnect();
 
+        try {
+            this.unregisterReceiver(this.mBatInfoReceiver);
+        } catch(Exception e){ }
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
     }
 
     private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
@@ -121,6 +116,7 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        ListView mLeaderboardListView;
         mMap = googleMap;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -140,10 +136,12 @@ public class LeaderboardActivity extends FragmentActivity implements OnMapReadyC
                 Location flagLoc = new Location(mLeaderboardArray.get(position).title);
                 flagLoc.setLatitude(mLeaderboardArray.get(position).latitude);
                 flagLoc.setLongitude(mLeaderboardArray.get(position).longitude);
-
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(flagLoc.getLatitude(), flagLoc.getLongitude())));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-                distanceToFlagTextView.setText("Distance to " + flagLoc.getProvider() + " : " + String.format("%.2f",mLastLocation.distanceTo(flagLoc)) + " m");
+
+                if(mLastLocation!=null) {
+                    distanceToFlagTextView.setText("Distance to " + flagLoc.getProvider() + " : " + String.format("%.2f", mLastLocation.distanceTo(flagLoc)) + " m");
+                }
             }
         });
 

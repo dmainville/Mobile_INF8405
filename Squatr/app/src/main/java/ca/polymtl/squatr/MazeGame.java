@@ -26,6 +26,8 @@ public class MazeGame extends AppCompatActivity {
     private int highscore;
     private String flag;
     private Chronometer chrono;
+    SensorManager sensorManager;
+    MazeView maze;
     private int[][] mazeMapVertical;
     private int[][] mazeMapHorizontal;
     private int currentX, currentY;
@@ -85,7 +87,7 @@ public class MazeGame extends AppCompatActivity {
                 new Pair(7,6),
                 new Pair(3,7)
         };
-        MazeView maze = new MazeView(this.getApplicationContext());
+        maze = new MazeView(this.getApplicationContext());
         if(zoneDeJeu != null)
             zoneDeJeu.addView(maze);
 
@@ -98,6 +100,7 @@ public class MazeGame extends AppCompatActivity {
     protected void onStop() {
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
+            sensorManager.unregisterListener(maze);
         } catch(Exception e){ }
 
         super.onStop();
@@ -128,7 +131,6 @@ public class MazeGame extends AppCompatActivity {
         float totalCellWidth, totalCellHeight;
         private final Paint line, red, green, darkgrey, background;
         final Context context;
-        final SensorManager sensorManager;
         final Sensor accelerometer;
 
         public MazeView(Context context){
@@ -146,7 +148,7 @@ public class MazeGame extends AppCompatActivity {
             background.setColor(Color.WHITE);
             sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
             setFocusable(true);
             this.setFocusableInTouchMode(true);
 

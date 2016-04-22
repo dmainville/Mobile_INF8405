@@ -57,7 +57,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
         lightOn = true;
         waiting = true;
-        intensiteTextView.setText("Attender la prochaine instruction! (Dévoiler la caméra avant en l'attendant!");
+        intensiteTextView.setText("Attendez la prochaine instruction! (Dévoiler la caméra avant en l'attendant!");
         Task task = new Task();
         task.execute();
 
@@ -101,7 +101,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
                 intensiteTextView.setText("Vous deviez attendre la prochaine instruction! (Dévoiler la caméra avant en l'attendant!)");
                 totalReactionTime += 1000;
             } else {
-                intensiteTextView.setText("Attender la prochaine instruction dans votre position acutelle!");
+                intensiteTextView.setText("Attendez la prochaine instruction dans votre position acutelle!");
                 totalReactionTime += SystemClock.elapsedRealtime() - reactionTime.getBase();
             }
             totalReactionTimeTextView.setText(String.valueOf(totalReactionTime));
@@ -121,7 +121,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
                 intensiteTextView.setText("Vous deviez attendre la prochaine instruction! (Cacher la caméra avant en l'attendant!)");
                 totalReactionTime += 1000;
             } else {
-                intensiteTextView.setText("Attender la prochaine instruction dans votre position acutelle!");
+                intensiteTextView.setText("Attendez la prochaine instruction dans votre position acutelle!");
                 totalReactionTime += SystemClock.elapsedRealtime() - reactionTime.getBase();
             }
             totalReactionTimeTextView.setText(String.valueOf(totalReactionTime));

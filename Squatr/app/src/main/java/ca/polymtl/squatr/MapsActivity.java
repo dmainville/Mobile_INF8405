@@ -122,12 +122,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Intent intent = new Intent(MapsActivity.this, MazeGame.class);
                             intent.putExtra("flag", mCloseFlags.get(position).title);
                             intent.putExtra("highscore", mCloseFlags.get(position).highscore);
+                            intent.putExtra("Battery", initialBatterieLevel);
                             startActivityForResult(intent, 1);
                         } else {
                             // Start light game
                             Intent intent = new Intent(MapsActivity.this, LightGame.class);
                             intent.putExtra("flag", mCloseFlags.get(position).title);
                             intent.putExtra("highscore", mCloseFlags.get(position).highscore);
+                            intent.putExtra("Battery", initialBatterieLevel);
                             startActivityForResult(intent, 2);
                         }
                     }
@@ -136,67 +138,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // Start location listener
-        Criteria criteria = new Criteria();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        provider = locationManager.getBestProvider(criteria, false);
-        locationListener = new UserLocation();
+        //Écouté le changement de niveau de batterie
+        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
             return;
         }
-        locationManager.requestLocationUpdates(provider, 1000, 0, locationListener);
-
-        //Écouté le changement de niveau de batterie
-        mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
-        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
+        StartLocationListener();
     }
-
-    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
-        @Override
-        public void onReceive(Context ctxt, Intent intent) {
-
-            //Récupérer le niveau actuel de la batterie
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-
-            if(initialBatterieLevel == -1)
-                initialBatterieLevel = level;
-
-            int consommation  = initialBatterieLevel-level;
-            //Consommation de batterie : 0%
-
-            //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Batterie : "+consommation+"%");
-        }
-    };
 
     @Override
     protected void onStart() {
         super.onStart();
         // Start location listener
         mGoogleApiClient.connect();
-        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-        // request update from db for flag locations and add change listener
-        mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                reloadAllFlags(snapshot);
-            }
-
-            @Override
-            public void onCancelled(FirebaseError error) {
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Start location listener
-        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-        updateProximityList(locationManager.getLastKnownLocation(provider));
         // request update from db for flag locations and add change listener
         mFirebaseRef.child("flags").addValueEventListener(new ValueEventListener() {
             @Override
@@ -216,19 +174,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Stop listener
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
+            locationManager.removeUpdates(locationListener);
         } catch(Exception e){ }
-
-        locationManager.removeUpdates(locationListener);
 
         if(mGoogleApiClient.isConnected())
             mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Stop location listener
-        locationManager.removeUpdates(locationListener);
     }
 
     @Override
@@ -241,13 +191,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
                     t.show();
+                    StartLocationListener();
                     return;
                 }
                 Toast t = Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT);
                 t.show();
-                // Start location listener
-                locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-                updateProximityList(locationManager.getLastKnownLocation(provider));
             } else {
                 Toast t = Toast.makeText(this, "Location Services must be active to use the app", Toast.LENGTH_LONG);
                 t.show();
@@ -332,6 +280,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+
+            //Récupérer le niveau actuel de la batterie
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+
+            if(initialBatterieLevel == -1)
+                initialBatterieLevel = level;
+
+            int consommation  = initialBatterieLevel-level;
+            //Consommation de batterie : 0%
+
+            //Afficher la différence avec le niveau initial
+            mTbBatterie.setText("Batterie : "+consommation+"%");
+        }
+    };
+
+
+    public void StartLocationListener(){
+        // Start location listener
+        Criteria criteria = new Criteria();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        provider = locationManager.getBestProvider(criteria, false);
+        locationListener = new UserLocation();
+        locationManager.requestLocationUpdates(provider, 1000, 0, locationListener);
+    }
+
     // This method is called when there is a change in the flags on the database.
     // It should also be called during initialization, to fetch all the flags
     private void reloadAllFlags(DataSnapshot snapshot)
@@ -406,10 +382,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnected(Bundle bundle) {
         lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude())));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-        firstUpdate = false;
-        updateProximityList(lastKnownLocation);
+        if(lastKnownLocation!= null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude())));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            firstUpdate = false;
+            updateProximityList(lastKnownLocation);
+        }
     }
 
     @Override
