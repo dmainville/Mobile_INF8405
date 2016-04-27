@@ -13,29 +13,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/light"
-        android:layout_marginTop="75dp"
         android:textSize="35sp"
+        android:id="@+id/WinningList"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/WinningList" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Dernier temps de réaction : "
-        android:layout_marginTop="75dp"
-        android:textSize="35sp"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/WinningList"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Temps de réaction total : "
+        android:text="@string/lightGameDernierTempsReactionText"
+        android:textSize="35sp"
+        android:id="@+id/textView2"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textSize="35sp"
         android:id="@+id/textView3"
-        android:layout_centerVertical="true"
+        android:text="@string/lightGameTempsReactionTotalText"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true" />
 
     <TextView
@@ -46,7 +44,7 @@
         android:layout_toEndOf="@+id/WinningList"
         android:layout_marginStart="51dp"
         android:textSize="35sp"
-        android:text="Attender la prochaine instruction!" />
+        android:text="@string/lightGameInstructionInit" />
 
     <TextView
         android:layout_width="wrap_content"

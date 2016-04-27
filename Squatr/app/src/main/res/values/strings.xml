@@ -13,4 +13,20 @@
     <string name="distancetoflag">Distance jusqu\'au drapeau : </string>
     <string name="leaderboardlist">Liste des Gagnants : </string>
     <string name="light">Lumière : </string>
+    <string name="instructionsMazeGame">Mettez votre appareil à plat. Inclinez votre appareil pour déplacer la bille rouge. Tentez d\'atteindre le point vert sans tomber dans les trous noirs.</string>
+    <string name="instructionsLightGame">Le jeu comporte 5 rondes. Dévoiler la caméra-avant avant de commencer. Cacher ou dégager la caméra selon les instructions.\n\nImportant: Maintenir la position jusqu\'à la prochaine instruction.</string>
+    <string name="lightGameInstructionInit">Attendez la prochaine instruction! (Dévoilez la caméra avant en l\'attendant!)</string>
+    <string name="lightGameDernierTempsReactionText">Dernier temps de réaction:</string>
+    <string name="lightGameTempsReactionTotalText">Temps de réaction total :</string>
+    <string name="lightGameInstructionShouldUncover">Vous deviez attendre la prochaine instruction! (Dévoilez la caméra avant en l\'attendant!)</string>
+    <string name="lightGameInstructionShouldCover">Vous deviez attendre la prochaine instruction! (Cachez la caméra avant en l\'attendant!)</string>
+    <string name="lightGameInstructionKeepCover">Continuez à cacher la caméra.</string>
+    <string name="lightGameInstructionKeepUncover">Continuez à maintenir la caméra dévoilée.</string>
+    <string name="lightGameInstructionCover">CACHEZ LA CAMÉRA!</string>
+    <string name="lightGameInstructionUncover">DÉVOILEZ LA CAMÉRA!</string>
+    <string name="flagsText">Drapeaux:</string>
+    <string name="totalFlagsText">Nombre total de drapeaux</string>
+    <string name="totalMazeGame">Drapeaux Maze Game</string>
+    <string name="totalLightGame">Drapeaux Light Game</string>
+    <string name="flagMapButton">Carte des Drapeaux</string>
 </resources>

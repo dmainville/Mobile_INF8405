@@ -2,6 +2,7 @@ package ca.polymtl.squatr;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
@@ -11,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.SystemClock;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Chronometer;
@@ -46,6 +48,26 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         flag = data.getString("flag");
         initialBatterieLevel = data.getInt("Battery");
 
+        // Créer une boite dialogue pour afficher les instuctions
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage(R.string.instructionsLightGame);
+        builder1.setCancelable(false);
+
+        builder1.setPositiveButton(
+                android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        initializeGame();
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+    }
+
+    void initializeGame()
+    {
         intensiteTextView = (TextView) findViewById(R.id.intensiteTextView);
         totalReactionTimeTextView = (TextView) findViewById(R.id.totalReactionTimeTextView);
 
@@ -57,11 +79,11 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
         lightOn = true;
         waiting = true;
-        intensiteTextView.setText("Attendez la prochaine instruction! (Dévoiler la caméra avant en l'attendant!");
+        intensiteTextView.setText(R.string.lightGameInstructionInit);
         Task task = new Task();
         task.execute();
 
-        //Écouté le changement de niveau de batterie
+        //Écouter le changement de niveau de batterie
         mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
         this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
     }
@@ -70,7 +92,7 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
     protected void onStop() {
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
-        } catch(Exception e){ }
+        } catch(Exception ignored){ }
         super.onStop();
     }
 
@@ -98,10 +120,10 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         if(lightOn && !waiting && event.values[0] > 2){
             reactionTime.stop();
             if(lastValue > 2) {
-                intensiteTextView.setText("Vous deviez attendre la prochaine instruction! (Dévoiler la caméra avant en l'attendant!)");
+                intensiteTextView.setText(R.string.lightGameInstructionShouldUncover);
                 totalReactionTime += 1000;
             } else {
-                intensiteTextView.setText("Attendez la prochaine instruction dans votre position acutelle!");
+                intensiteTextView.setText(R.string.lightGameInstructionKeepUncover);
                 totalReactionTime += SystemClock.elapsedRealtime() - reactionTime.getBase();
             }
             totalReactionTimeTextView.setText(String.valueOf(totalReactionTime));
@@ -118,10 +140,10 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
         if(!lightOn && !waiting && event.values[0] < 2){
             reactionTime.stop();
             if(lastValue < 2) {
-                intensiteTextView.setText("Vous deviez attendre la prochaine instruction! (Cacher la caméra avant en l'attendant!)");
+                intensiteTextView.setText(R.string.lightGameInstructionShouldCover);
                 totalReactionTime += 1000;
             } else {
-                intensiteTextView.setText("Attendez la prochaine instruction dans votre position acutelle!");
+                intensiteTextView.setText(R.string.lightGameInstructionKeepCover);
                 totalReactionTime += SystemClock.elapsedRealtime() - reactionTime.getBase();
             }
             totalReactionTimeTextView.setText(String.valueOf(totalReactionTime));
@@ -179,11 +201,11 @@ public class LightGame extends AppCompatActivity implements SensorEventListener{
 
             if (lightOn) {
                 lightOn = false;
-                intensiteTextView.setText("Off!");
+                intensiteTextView.setText(R.string.lightGameInstructionCover);
             }
             else {
                 lightOn = true;
-                intensiteTextView.setText("On!");
+                intensiteTextView.setText(R.string.lightGameInstructionUncover);
             }
 
             waiting = false;

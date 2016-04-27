@@ -28,7 +28,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Carte des Drapeaux"
+        android:text="@string/flagMapButton"
         android:id="@+id/flagMapButton"
         android:layout_below="@+id/leaderboardButton"
         android:layout_centerHorizontal="true" />

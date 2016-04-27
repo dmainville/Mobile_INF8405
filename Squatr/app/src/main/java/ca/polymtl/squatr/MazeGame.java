@@ -2,6 +2,7 @@ package ca.polymtl.squatr;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
@@ -13,6 +14,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.os.SystemClock;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
@@ -47,6 +49,27 @@ public class MazeGame extends AppCompatActivity {
         flag = data.getString("flag");
         initialBatterieLevel = data.getInt("Battery");
 
+
+        // Créer une boite dialogue pour afficher les instuctions
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage(R.string.instructionsMazeGame);
+        builder1.setCancelable(false);
+
+        builder1.setPositiveButton(
+                android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        initializeGame();
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+    }
+
+    void initializeGame()
+    {
         GridLayout zoneDeJeu = (GridLayout) findViewById(R.id.zoneDeJeu);
         chrono = (Chronometer) findViewById(R.id.chronometer);
 
@@ -91,7 +114,7 @@ public class MazeGame extends AppCompatActivity {
         if(zoneDeJeu != null)
             zoneDeJeu.addView(maze);
 
-        //Écouté le changement de niveau de batterie
+        //Écouter le changement de niveau de batterie
         mTbBatterie = (TextView) findViewById(R.id.lblBatterie);
         this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
     }
