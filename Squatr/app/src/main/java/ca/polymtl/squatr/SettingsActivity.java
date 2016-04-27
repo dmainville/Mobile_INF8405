@@ -44,7 +44,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onStop() {
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
-        } catch(Exception e){ }
+        } catch(Exception ignored){ }
         super.onStop();
     }
 
@@ -62,7 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
             //Consommation de batterie : 0%
 
             //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Consommation de batterie : "+consommation+"%");
+            mTbBatterie.setText(getString(R.string.batteryLabel)+consommation+"%");
         }
     };
 

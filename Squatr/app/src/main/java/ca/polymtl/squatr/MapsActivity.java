@@ -294,7 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Consommation de batterie : 0%
 
             //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Batterie : "+consommation+"%");
+            mTbBatterie.setText(getString(R.string.batteryLabel)+consommation+"%");
         }
     };
 

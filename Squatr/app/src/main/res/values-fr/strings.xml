@@ -27,4 +27,10 @@
     <string name="lightGameInstructionUncover">DÉVOILEZ LA CAMÉRA!</string>
     <string name="flagsText">Drapeaux:</string>
     <string name="flagMapButton">Carte des Drapeaux</string>
+    <string name="totalFlagsText">Nombre total de drapeaux</string>
+    <string name="totalLightGame">Drapeaux Light Game</string>
+    <string name="totalMazeGame">Drapeaux Maze Game</string>
+    <string name="distanceTo">Distance jusqu\'à</string>
+    <string name="batteryLabel">Consommation de batterie :</string>
+    <string name="createUsernameToaster">Créer un nom d\'utilisateur dans le  menu "Paramètre" avant de débuter.</string>
 </resources>

@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Pair;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -80,7 +79,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     protected void onStop() {
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
-        } catch(Exception e){ }
+        } catch(Exception ignored){ }
         super.onStop();
     }
 
@@ -104,7 +103,7 @@ public class LeaderboardActivity extends AppCompatActivity {
             //Consommation de batterie : 0%
 
             //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Batterie : "+consommation+"%");
+            mTbBatterie.setText(getString(R.string.batteryLabel)+consommation+"%");
         }
     };
 

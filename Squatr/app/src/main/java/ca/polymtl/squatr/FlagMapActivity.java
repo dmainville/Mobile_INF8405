@@ -86,7 +86,7 @@ public class FlagMapActivity extends FragmentActivity implements OnMapReadyCallb
 
         try {
             this.unregisterReceiver(this.mBatInfoReceiver);
-        } catch(Exception e){
+        } catch(Exception ignored){
         }
         super.onStop();
     }
@@ -111,7 +111,7 @@ public class FlagMapActivity extends FragmentActivity implements OnMapReadyCallb
             //Consommation de batterie : 0%
 
             //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Batterie : "+consommation+"%");
+            mTbBatterie.setText(getString(R.string.batteryLabel) +consommation+"%");
         }
     };
 
@@ -139,7 +139,7 @@ public class FlagMapActivity extends FragmentActivity implements OnMapReadyCallb
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
                 if (mLastLocation != null) {
-                    distanceToFlagTextView.setText("Distance to " + flagLoc.getProvider() + " : " + String.format("%.2f", mLastLocation.distanceTo(flagLoc)) + " m");
+                    distanceToFlagTextView.setText(getString(R.string.distanceTo) + " " + flagLoc.getProvider() + " : " + String.format("%.2f", mLastLocation.distanceTo(flagLoc)) + " m");
                 }
             }
         });

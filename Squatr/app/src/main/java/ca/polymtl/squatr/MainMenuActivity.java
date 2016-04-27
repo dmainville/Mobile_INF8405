@@ -67,7 +67,7 @@ public class MainMenuActivity extends AppCompatActivity {
             //Consommation de batterie : 0%
 
             //Afficher la différence avec le niveau initial
-            mTbBatterie.setText("Consommation de batterie : "+consommation+"%");
+            mTbBatterie.setText(getString(R.string.batteryLabel)+consommation+"%");
         }
     };
 
@@ -86,7 +86,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mUsername.isEmpty())
-                    Toast.makeText(getApplicationContext(), "Creer un nom d'utilisateur dans le menu Parametre avant de debuter!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.createUsernameToaster), Toast.LENGTH_SHORT).show();
                 else {
                     Intent intent = new Intent(MainMenuActivity.this, MapsActivity.class);
                     intent.putExtra("Username", mUsername);
