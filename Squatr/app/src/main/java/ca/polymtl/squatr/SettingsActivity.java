@@ -71,7 +71,6 @@ public class SettingsActivity extends AppCompatActivity {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: save username locally
                 editor = sharedPref.edit();
                 editor.putString("Username", usernameEditText.getText().toString());
                 editor.apply();
